@@ -54,29 +54,26 @@ implementation of the HCB1 online cipher from \[[BBKN07][BBKN07]\].
 
 We implemented the following SSE schemes:
 
-+ **2Lev**:  a static and I/O-efficient SSE scheme by Cash, Jaeger, Jarecki,
-  Jutla, Krawczyk, Rosu and Steiner from \[[CJJJKRS14][CJJJKRS14]]\. 
++ **2Lev**:  a static and I/O-efficient SSE scheme \[[CJJJKRS14][CJJJKRS14]]\. 
 
-+ **IEX^B-2Lev**: a  worst-case optimal boolean SSE scheme by Kamara and Moataz
-  from \[[KM16][KM16]\].  This implementation makes use of **2Lev** as a
-building block.  The disjunctive-only IEX-2Lev construction from
-\[[KM16][KM16]\] is a special case of IEX^B-2Lev where the number of
-disjunctions is set to 1 in the Token algorithm.  
++ **IEX^B-2Lev**: a  worst-case optimal boolean SSE scheme \[[KM16][KM16]\].
+  This implementation makes use of 2Lev as a building block.  The
+disjunctive-only IEX-2Lev construction from \[[KM16][KM16]\] is a special case
+of IEX^B-2Lev where the number of disjunctions is set to 1 in the Token
+algorithm.
 
-+ **ZMF**: a highly compact single-keyword SSE scheme by Kamara and Moataz
-  (with *linear* search complexity). The construction is inspired by  the Z-IDX
-construction of Goh \[[Goh03][Goh03]\] but handles *variable*-sized collections
-of Bloom filters called *Matryoshka filters*. ZMF also makes a non-standard use
-of online ciphers.  Here, we implemented the HCBC1 construction from Bellare,
-Boldyreva, Knudsen and Namprempre \[[BBKN07][BBKN07]\] but would like to
-replace this with the more efficient COPE scheme from Elena Andreeva, Andrey
-Bogdanov, Atul Luykx, Bart Mennink, Elmar Tischhauser, and Kan Yasuda from
-\[[ABLMTY13][ABLMTY13]\]. 
++ **ZMF**: a compact single-keyword SSE scheme 
+  (with linear search complexity) \[[KM16][KM16]\]. The construction is
+inspired by  the Z-IDX construction \[[Goh03][Goh03]\] but handles
+variable-sized collections of Bloom filters called *Matryoshka filters*. ZMF
+also makes a non-standard use of online ciphers.  Here, we implemented the
+HCBC1 construction from  \[[BBKN07][BBKN07]\] but would like to replace this
+with the more efficient COPE scheme from \[[ABLMTY13][ABLMTY13]\]. 
 
-+ **IEX-ZMF**: an implementation of IEX-ZMF. Here, instead of using the 2Lev construction as the main building block, we use ZMF. Similarly to our IEX^B-2Lev implementation,
-we implemented IEX^B-ZMF which handles boolean queries. 
++ **IEX^B-ZMF**: a compact worst-case optimal boolean SSE scheme. Like our
+  IEX^B-2Lev implementation, the purely disjunctive variant IEX-ZMF is a special case with the number of disjunctions set to 1. 
 
-+ **IEX-2Lev-Amazon**: an distributed implementation of text indexing based on MapReduce/Hadoop
++ **IEX-2Lev-Amazon**: a distributed implementation of text indexing based on MapReduce/Hadoop
 on [Amazon AWS](https://aws.amazon.com/fr/). 
 
 + We also plan to share our Client-Server implementation for 2Lev, IEX^B-2Lev, IEX^B-ZMF once finalized. 
@@ -92,11 +89,18 @@ libraries, store some files in the folder and enjoy!
 + to test IEX-2Lev on Amazon run `IEX2LevAMAZON`
 
 
+## References
 
-[CJJJKRS14]: https://eprint.iacr.org/2014/853.pdf "Dynamic Searchable Encryption in Very-Large Databases: Data Structures and Implementation"
-[KM16]: https://eprint.iacr.org/2014/853.pdf "Boolean Searchable Symmetric Encryption with Worst-Case Optimal Complexity"
-[Goh03]: https://eprint.iacr.org/2003/216.pdf "Secure Indexes"
-[ABLMTY13]: https://eprint.iacr.org/2013/790.pdf "Parallelizable and Authenticated Online Ciphers"
-[BBKN07]: https://cseweb.ucsd.edu/~mihir/papers/olc.pdf "On-Line Ciphers and the Hash-CBC Constructions" 
+1. \[[CJJJKRS14](https://eprint.iacr.org/2014/853.pdf)\]: D. Cash, S. Jarecki, C. Jutla, H. Krawczyk, M. Rosu, M. Steiner. *Dynamic Searchable Encryption in Very-Large Databases: Data Structures and Implementation*.
+
+2. \[KM16\]: S. Kamara and T. Moataz. "Boolean Searchable Symmetric Encryption with Worst-Case Optimal Complexity". Available upon request. 
+
+3. \[[Goh03](https://eprint.iacr.org/2003/216.pdf)\]: E. Goh. *Secure Indexes*. 
+
+4. \[[ABLMTY13](https://eprint.iacr.org/2013/790.pdf)\]: E. Andreeva, A.  
+Bogdanov, A. Luykx, B. Mennink, E. Tischhauser, and K. Yasuda. *Parallelizable and Authenticated Online Ciphers*. 
+
+5. \[[BBKN07](https://cseweb.ucsd.edu/~mihir/papers/olc.pdf)\]: M. Bellare,
+A. Boldyreva, L. Knudsen and C. Namprempre. *On-Line Ciphers and the Hash-CBC Constructions*.  
 
 
