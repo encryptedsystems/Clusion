@@ -91,16 +91,18 @@ libraries, store some files in the folder and enjoy!
 
 ## References
 
-1. \[[CJJJKRS14](https://eprint.iacr.org/2014/853.pdf)\]: D. Cash, S. Jarecki, C. Jutla, H. Krawczyk, M. Rosu, M. Steiner. *Dynamic Searchable Encryption in Very-Large Databases: Data Structures and Implementation*.
+1. \[[CJJJKRS14](https://eprint.iacr.org/2014/853.pdf)\]:  *Dynamic Searchable Encryption in Very-Large Databases: Data Structures and Implementation* by D. Cash, S. Jarecki, C. Jutla, H. Krawczyk, M. Rosu, M. Steiner.
 
-2. \[KM16\]: S. Kamara and T. Moataz. "Boolean Searchable Symmetric Encryption with Worst-Case Optimal Complexity". Available upon request. 
+2. \[KM16\]:  *Boolean Searchable Symmetric Encryption with Worst-Case Optimal Complexity* by S. Kamara and T. Moataz. Available upon request. 
 
-3. \[[Goh03](https://eprint.iacr.org/2003/216.pdf)\]: E. Goh. *Secure Indexes*. 
+3. \[[Goh03](https://eprint.iacr.org/2003/216.pdf)\]: *Secure Indexes* by E. Goh. 
 
-4. \[[ABLMTY13](https://eprint.iacr.org/2013/790.pdf)\]: E. Andreeva, A.  
-Bogdanov, A. Luykx, B. Mennink, E. Tischhauser, and K. Yasuda. *Parallelizable and Authenticated Online Ciphers*. 
+4. \[[ABLMTY13](https://eprint.iacr.org/2013/790.pdf)\]: *Parallelizable and
+   Authenticated Online Ciphers* by E. Andreeva, A.  Bogdanov, A. Luykx, B.
+Mennink, E. Tischhauser, and K. Yasuda. . 
 
-5. \[[BBKN07](https://cseweb.ucsd.edu/~mihir/papers/olc.pdf)\]: M. Bellare,
-A. Boldyreva, L. Knudsen and C. Namprempre. *On-Line Ciphers and the Hash-CBC Constructions*.  
+5. \[[BBKN07](https://cseweb.ucsd.edu/~mihir/papers/olc.pdf)\]:  *On-Line
+   Ciphers and the Hash-CBC Constructions* by M. Bellare, A. Boldyreva, L.
+Knudsen and C. Namprempre.
 
 
