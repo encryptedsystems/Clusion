@@ -68,16 +68,16 @@ a *variable*-sized collection of Bloom filters referred to as *Matryoshka
 filters*. These  filters share the same hash functions for better search
 efficiency, i.e., a single token can be used for multiple filters thereby
 reducing the communication complexity. **ZMF** also makes a non-standard use of
-online ciphers.  Here, we implmented the HCBC1 construction but would like to
-replace this with the more efficient COPE scheme of Elena Andreeva, Andrey
-Bogdanov, Atul Luykx, Bart Mennink, Elmar Tischhauser, and Kan Yasuda
-*Parallelizable and authenticated online ciphers*. 
+online ciphers.  Here, we implemented the HCBC1 construction from
+\[[BBKN07][BBKN07]\]but would like to replace this with the more efficient COPE
+scheme of Elena Andreeva, Andrey Bogdanov, Atul Luykx, Bart Mennink, Elmar
+Tischhauser, and Kan Yasuda from \[[ABLMTY13][ABLMTY13]\]. 
 
 + **IEX-ZMF**: an implementation of **IEX-ZMF**. Here, instead of using the **2Lev** construction as the main building block, we use **ZMF**. Similarly to our **IEX^B-2Lev** implementation,
 we implemented **IEX^B-ZMF** which handles boolean queries. 
 
 + **IEX-2Lev-Amazon**: an implementation of text indexing based on MapReduce/Hadoop
-on Amazon AWS: https://aws.amazon.com/fr/. 
+on [Amazon AWS](https://aws.amazon.com/fr/). 
 
 + We also plan to share our Client-Server implementation for **2Lev**, **IEX^B-2Lev**, **IEX^B-ZMF** once finalized. 
 
@@ -92,6 +92,10 @@ libraries, store some files in the folder and enjoy!
 + to run IEX-2Lev on Amazon run IEX2LevAMAZON
 
 
-[CJJJKRS14] https://eprint.iacr.org/2014/853.pdf "[CJJJKRS14]"
-[KM16] https://eprint.iacr.org/2014/853.pdf "[KM16]"
-[Goh03] https://eprint.iacr.org/2003/216.pdf "[Goh03]"
+[CJJJKRS14]: https://eprint.iacr.org/2014/853.pdf "[CJJJKRS14]"
+[KM16]: https://eprint.iacr.org/2014/853.pdf "[KM16]"
+[Goh03]: https://eprint.iacr.org/2003/216.pdf "[Goh03]"
+[ABLMTY13]: https://eprint.iacr.org/2013/790.pdf "[ABLMTY13]"
+[BBKN07]: https://cseweb.ucsd.edu/~mihir/papers/olc.pdf "[BBKN07]" 
+
+
