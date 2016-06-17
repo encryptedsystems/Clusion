@@ -5,10 +5,15 @@
 The implementation requires the following APIs:
 
 Bouncy Castle					https://www.bouncycastle.org/
+
 Apache Lucene					https://lucene.apache.org/core/
+
 Apache PDFBox					https://pdfbox.apache.org/
+
 Apache POI					https://poi.apache.org/
+
 Google Guava					https://poi.apache.org/
+
 SizeOF (needed to caculate object size in Java)	http://sizeof.sourceforge.net/
 
 In order to run IEX2LevAMAZON, hadoop-2.7.1 was used (earlier releases may work
@@ -63,7 +68,8 @@ filters share the same hash functions for better search efficiency, i.e., a
 single token can be used for multiple filters thereby reducing the
 communication complexity. **ZMF** makes a non-standard use of online ciphers.
 Here, we implmented the HCBC1 construction but would like to replace this with
-the more efficient COPE scheme of XXXXXX. 
+the more efficient COPE scheme of Elena Andreeva, Andrey Bogdanov, Atul Luykx, Bart Mennink, Elmar Tischhauser, and
+Kan Yasuda *Parallelizable and authenticated online ciphers*. 
 
 _ **IEX-ZMF**: an implementation of **IEX-ZMF**. Here, instead of using the **2Lev** construction as the main building block, we use **ZMF**. Similarly to our **IEX^B-2Lev** implementation,
 we implemented **IEX^B-ZMF** which handles boolean queries. 
