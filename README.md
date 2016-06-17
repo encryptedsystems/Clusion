@@ -14,7 +14,7 @@ Apache POI					https://poi.apache.org/
 
 Google Guava					https://poi.apache.org/
 
-SizeOF (needed to caculate object size in Java)	http://sizeof.sourceforge.net/
+SizeOF (needed to calculate object size in Java)	http://sizeof.sourceforge.net/
 
 In order to run IEX2LevAMAZON, hadoop-2.7.1 was used (earlier releases may work
 as well but were not tested) http://hadoop.apache.org/releases.html
