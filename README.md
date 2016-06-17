@@ -1,25 +1,34 @@
 # The Clusion Library
 
+Clusion is an easy to use software library for searchable symmetric encryption
+(SSE). Its goal is to provide modular implementations of various
+state-of-the-art SSE schemes. Clusion includes constructions that handle
+single, disjunctive, conjunctive and (arbitrary) boolean keyword search.  All
+the implemented schemes have *optimal* asymptotic search complexity in the
+worst-case.  
+
+Clusion is provided as-is under the *Modified BSD License* (BSD-3). 
+
 
 ## Requirements:
-The implementation requires the following APIs:
+Clusion is written in Java and has the following dependencies:
 
-Bouncy Castle					https://www.bouncycastle.org/
++ Bouncy Castle					https://www.bouncycastle.org/
 
-Apache Lucene					https://lucene.apache.org/core/
++ Apache Lucene					https://lucene.apache.org/core/
 
-Apache PDFBox					https://pdfbox.apache.org/
++ Apache PDFBox					https://pdfbox.apache.org/
 
-Apache POI					https://poi.apache.org/
++ Apache POI					https://poi.apache.org/
 
-Google Guava					https://poi.apache.org/
++ Google Guava					https://poi.apache.org/
 
-SizeOF (needed to calculate object size in Java)	http://sizeof.sourceforge.net/
++ SizeOF (needed to calculate object size in Java)	http://sizeof.sourceforge.net/
 
-In order to run IEX2LevAMAZON, hadoop-2.7.1 was used (earlier releases may work
+In order to run **IEX2LevAMAZON**, hadoop-2.7.1 was used (earlier releases may work
 as well but were not tested) http://hadoop.apache.org/releases.html
 
-The sources were tested in Java version "1.7.0_75"
+The sources were tested in Java version `1.7.0_75`.
 
 
 ## Implementation:
@@ -69,7 +78,7 @@ filters*. These  filters share the same hash functions for better search
 efficiency, i.e., a single token can be used for multiple filters thereby
 reducing the communication complexity. **ZMF** also makes a non-standard use of
 online ciphers.  Here, we implemented the HCBC1 construction from
-\[[BBKN07][BBKN07]\]but would like to replace this with the more efficient COPE
+\[[BBKN07][BBKN07]\] but would like to replace this with the more efficient COPE
 scheme of Elena Andreeva, Andrey Bogdanov, Atul Luykx, Bart Mennink, Elmar
 Tischhauser, and Kan Yasuda from \[[ABLMTY13][ABLMTY13]\]. 
 
@@ -92,10 +101,11 @@ libraries, store some files in the folder and enjoy!
 + to run IEX-2Lev on Amazon run IEX2LevAMAZON
 
 
-[CJJJKRS14]: https://eprint.iacr.org/2014/853.pdf "[CJJJKRS14]"
-[KM16]: https://eprint.iacr.org/2014/853.pdf "[KM16]"
-[Goh03]: https://eprint.iacr.org/2003/216.pdf "[Goh03]"
-[ABLMTY13]: https://eprint.iacr.org/2013/790.pdf "[ABLMTY13]"
-[BBKN07]: https://cseweb.ucsd.edu/~mihir/papers/olc.pdf "[BBKN07]" 
+
+[CJJJKRS14]: https://eprint.iacr.org/2014/853.pdf "Dynamic Searchable Encryption in Very-Large Databases: Data Structures and Implementation"
+[KM16]: https://eprint.iacr.org/2014/853.pdf "Boolean Searchable Symmetric Encryption with Worst-Case Optimal Complexity"
+[Goh03]: https://eprint.iacr.org/2003/216.pdf "Secure Indexes"
+[ABLMTY13]: https://eprint.iacr.org/2013/790.pdf "Parallelizable and Authenticated Online Ciphers"
+[BBKN07]: https://cseweb.ucsd.edu/~mihir/papers/olc.pdf "On-Line Ciphers and the Hash-CBC Constructions" 
 
 
