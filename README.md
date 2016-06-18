@@ -10,7 +10,7 @@ worst-case.
 Clusion is provided as-is under the *Modified BSD License* (BSD-3). 
 
 
-## Requirements:
+## Requirements
 Clusion is written in Java and has the following dependencies:
 
 + Bouncy Castle					https://www.bouncycastle.org/
@@ -32,9 +32,9 @@ Clusion is written in Java and has the following dependencies:
 Clusion was tested with Java version `1.7.0_75`.
 
 
-## Implementation:
+## Implementation
 
-*Indexing.* Our indexer takes as input a folder that can contain pdf files,
+*Indexing.* The indexer takes as input a folder that can contain pdf files,
 Micorosft files such .doc, .ppt, media files such as pictures and videos as
 well as raw text files such .html and .txt. The indexing step outputs two
 lookup tables. The first associates keywords to document filenames while the
@@ -43,7 +43,7 @@ tokenize the keywords and get rid of noisy words.  For this phase, Apache
 Lucene, PDFBox and POI are required. For our data structures, we use Google
 Guava.
 
-*Cryptographic primitives.* All our implementations make use of the Bouncy
+*Cryptographic primitives.* All the implementations make use of the Bouncy
 Castle library. The code is modular and all cryptographic primitives are
 gathered in the `CryptoPrimitives.java` file.  The file contains AES-CTR,
 HMAC_SHA256/512, AES-CMAC, key generation based on PBE PKCS1 and random string
@@ -52,7 +52,7 @@ implementation of the HCB1 online cipher from \[[BBKN07][BBKN07]\].
 
 
 
-We implemented the following SSE schemes:
+The following SSE schemes are implemented:
 
 + **2Lev**:  a static and I/O-efficient SSE scheme \[[CJJJKRS14][CJJJKRS14]]\. 
 
@@ -78,7 +78,7 @@ on [Amazon AWS](https://aws.amazon.com/fr/).
 
 + We also plan to share our Client-Server implementation for 2Lev, IEX^B-2Lev, IEX^B-ZMF once finalized. 
 
-## Quick Test:
+## Quick Test
 
 For a quick test, create a folder, make sure that you have all required
 libraries, store some files in the folder and enjoy!
@@ -88,6 +88,15 @@ libraries, store some files in the folder and enjoy!
 + to test IEX-ZMF run `TestLocalIEXZMF`
 + to test IEX-2Lev on Amazon run `IEX2LevAMAZON`
 
+
+## Documentation
+
+Clusion currently does not have any documentation. The best way to learn how to
+use the library is to read through the source of the test code:
+
++ `TestLocal2Lev.java`
++ `TestLocalIEX2Lev.java`
++ `TestLocalIEXZMF.java`
 
 ## References
 
@@ -106,3 +115,8 @@ Mennink, E. Tischhauser, and K. Yasuda. .
 Knudsen and C. Namprempre.
 
 
+[CJJKRS14]: https://eprint.iacr.org/2014/853.pdf
+[KM16]: 
+[Goh03]: https://eprint.iacr.org/2003/216.pdf
+[ABLMTY13]: https://eprint.iacr.org/2013/790.pdf
+[BBKN07]: https://cseweb.ucsd.edu/~mihir/papers/olc.pdf
