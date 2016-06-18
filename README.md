@@ -116,7 +116,6 @@ Knudsen and C. Namprempre.
 
 
 [CJJKRS14]: https://eprint.iacr.org/2014/853.pdf
-[KM16]: 
 [Goh03]: https://eprint.iacr.org/2003/216.pdf
 [ABLMTY13]: https://eprint.iacr.org/2013/790.pdf
 [BBKN07]: https://cseweb.ucsd.edu/~mihir/papers/olc.pdf
