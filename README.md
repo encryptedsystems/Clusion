@@ -56,14 +56,14 @@ The following SSE schemes are implemented:
 
 + **2Lev**:  a static and I/O-efficient SSE scheme \[[CJJJKRS14][CJJJKRS14]]\. 
 
-+ **IEX^B-2Lev**: a  worst-case optimal boolean SSE scheme \[[KM16][KM16]\].
++ **IEX^B-2Lev**: a  worst-case optimal boolean SSE scheme \[KM16\].
   This implementation makes use of 2Lev as a building block.  The
-disjunctive-only IEX-2Lev construction from \[[KM16][KM16]\] is a special case
+disjunctive-only IEX-2Lev construction from \[KM16\] is a special case
 of IEX^B-2Lev where the number of disjunctions is set to 1 in the Token
 algorithm.
 
 + **ZMF**: a compact single-keyword SSE scheme 
-  (with linear search complexity) \[[KM16][KM16]\]. The construction is
+  (with linear search complexity) \[KM16\]. The construction is
 inspired by  the Z-IDX construction \[[Goh03][Goh03]\] but handles
 variable-sized collections of Bloom filters called *Matryoshka filters*. ZMF
 also makes a non-standard use of online ciphers.  Here, we implemented the
@@ -100,7 +100,7 @@ use the library is to read through the source of the test code:
 
 ## References
 
-1. \[[CJJJKRS14](https://eprint.iacr.org/2014/853.pdf)\]:  *Dynamic Searchable Encryption in Very-Large Databases: Data Structures and Implementation* by D. Cash, S. Jarecki, C. Jutla, H. Krawczyk, M. Rosu, M. Steiner.
+1. \[[CJJJKRS14](https://eprint.iacr.org/2014/853.pdf)\]:  *Dynamic Searchable Encryption in Very-Large Databases: Data Structures and Implementation* by D. Cash, J. Jaeger, S. Jarecki, C. Jutla, H. Krawczyk, M. Rosu, M. Steiner.
 
 2. \[KM16\]:  *Boolean Searchable Symmetric Encryption with Worst-Case Optimal Complexity* by S. Kamara and T. Moataz. Available upon request. 
 
@@ -115,7 +115,7 @@ Mennink, E. Tischhauser, and K. Yasuda. .
 Knudsen and C. Namprempre.
 
 
-[CJJKRS14]: https://eprint.iacr.org/2014/853.pdf
+[CJJJKRS14]: https://eprint.iacr.org/2014/853.pdf
 [Goh03]: https://eprint.iacr.org/2003/216.pdf
 [ABLMTY13]: https://eprint.iacr.org/2013/790.pdf
 [BBKN07]: https://cseweb.ucsd.edu/~mihir/papers/olc.pdf
