@@ -409,7 +409,7 @@ public class IEX2LevAMAZON {
 
 		 Job job = Job.getInstance(conf, "IEX-2Lev");
 
-		 job.setJarByClass(DISJMapRed.class);
+		 job.setJarByClass(IEX2LevAMAZON.class);
 
 		 job.setMapperClass(MLK1.class);
 
@@ -435,7 +435,7 @@ public class IEX2LevAMAZON {
 
 		 Job job2 = Job.getInstance(conf2, "IEX-2Lev");
 
-		 job2.setJarByClass(DISJMapRed.class);
+		 job2.setJarByClass(IEX2LevAMAZON.class);
 
 		 job2.setMapperClass(MLK2.class);
 
@@ -561,7 +561,7 @@ public class IEX2LevAMAZON {
 		 String pass	=	keyRead.readLine();
 
 		 // You can change the size of the key; Here we set it to 128
-		 List<byte[]> listSK	=	DISJ2.keyGen(128, pass, "salt/salt", 100);
+		 List<byte[]> listSK	=	IEX2Lev.keyGen(128, pass, "salt/salt", 100);
 
 		 // Generation of Local Multi-maps with Mapper job only without reducer
 
@@ -581,7 +581,7 @@ public class IEX2LevAMAZON {
 
 		 Job job3 = Job.getInstance(conf3, "Local MM");
 
-		 job3.setJarByClass(DISJMapRed.class);
+		 job3.setJarByClass(IEX2LevAMAZON.class);
 
 		 job3.setMapperClass(LocalMM.class);
 
