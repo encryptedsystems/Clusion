@@ -3,6 +3,7 @@
 /////////////////////    Generation of the token of IEX-ZMF 
 //***********************************************************************************************//	
 
+package org.crypto.sse;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;

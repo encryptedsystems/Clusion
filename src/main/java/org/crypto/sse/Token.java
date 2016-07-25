@@ -3,7 +3,7 @@
 /////////////////////    Generation of the token of IEX-ZMF (adapted for both Cash et al. (Crypto'13) and (NDSS'14)
 //***********************************************************************************************//	
 
-
+package org.crypto.sse;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;

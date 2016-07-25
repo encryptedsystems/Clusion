@@ -1,3 +1,4 @@
+package org.crypto.sse;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -39,6 +40,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import org.crypto.sse.*;
 
 import java.util.ArrayList;
 
@@ -202,7 +204,7 @@ public class IEX2LevAMAZON {
 			 // We are using a standard tokenizer that eliminates the stop words. We can use Stemming tokenizer such Porter
 			 // A set of English noise keywords is used that will eliminates words such as "the, a, etc"
 			 Analyzer analyzer = new StandardAnalyzer(noise); 
-			 List<String> token=Tokenizer.tokenizeString(analyzer, line);	
+			 List<String> token= Tokenizer.tokenizeString(analyzer, line);
 			 Iterator<String> it = token.iterator();
 			 while (it.hasNext()) {
 				 word.set(it.next());
@@ -367,7 +369,7 @@ public class IEX2LevAMAZON {
 
 			 try {
 				 if (secondaryLookup.size()>0){
-					 obj = MMGlobal.setupSI(CryptoPrimitives.generateCmac(listSK.get(0),token[0]), secondaryLookup.keySet(), secondaryLookup, bigBlock, smallBlock, dataSize);
+					 obj = MMGlobal.setupSI(CryptoPrimitives.generateCmac(listSK.get(0),token[0]), secondaryLookup.keySet().toArray(new String[0]), secondaryLookup, bigBlock, smallBlock, dataSize);
 				 }
 			 } catch (InvalidKeyException
 					 | InvalidAlgorithmParameterException
@@ -409,7 +411,7 @@ public class IEX2LevAMAZON {
 
 		 Job job = Job.getInstance(conf, "IEX-2Lev");
 
-		 job.setJarByClass(DISJMapRed.class);
+		 job.setJarByClass(IEX2LevAMAZON.class);
 
 		 job.setMapperClass(MLK1.class);
 
@@ -435,7 +437,7 @@ public class IEX2LevAMAZON {
 
 		 Job job2 = Job.getInstance(conf2, "IEX-2Lev");
 
-		 job2.setJarByClass(DISJMapRed.class);
+		 job2.setJarByClass(IEX2LevAMAZON.class);
 
 		 job2.setMapperClass(MLK2.class);
 
@@ -561,7 +563,7 @@ public class IEX2LevAMAZON {
 		 String pass	=	keyRead.readLine();
 
 		 // You can change the size of the key; Here we set it to 128
-		 List<byte[]> listSK	=	DISJ2.keyGen(128, pass, "salt/salt", 100);
+		 List<byte[]> listSK	= IEX2Lev.keyGen(128, pass, "salt/salt", 100);
 
 		 // Generation of Local Multi-maps with Mapper job only without reducer
 
@@ -581,7 +583,7 @@ public class IEX2LevAMAZON {
 
 		 Job job3 = Job.getInstance(conf3, "Local MM");
 
-		 job3.setJarByClass(DISJMapRed.class);
+		 job3.setJarByClass(IEX2LevAMAZON.class);
 
 		 job3.setMapperClass(LocalMM.class);
 

@@ -3,6 +3,7 @@
 /////////////////////    Text Parsing with a new partitioning technique 	/////////////////////////////
 
 //***********************************************************************************************//
+package org.crypto.sse;
 
 import com.google.common.collect.Multimap;
 import java.io.BufferedWriter;

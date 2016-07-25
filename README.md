@@ -83,9 +83,9 @@ on [Amazon AWS](https://aws.amazon.com/fr/).
 For a quick test, create a folder, make sure that you have all required
 libraries, store some files in the folder and enjoy!
 
-+ to test 2Lev run `TestLocal2Lev`
-+ to test IEX-2Lev run `TestLocalIEX2Lev`
-+ to test IEX-ZMF run `TestLocalIEXZMF`
++ to test 2Lev run `org.crypto.sse.TestLocal2Lev`
++ to test IEX-2Lev run `org.crypto.sse.TestLocalIEX2Lev`
++ to test IEX-ZMF run `org.crypto.sse.TestLocalIEXZMF`
 + to test IEX-2Lev on Amazon run `IEX2LevAMAZON`
 
 
@@ -94,9 +94,9 @@ libraries, store some files in the folder and enjoy!
 Clusion currently does not have any documentation. The best way to learn how to
 use the library is to read through the source of the test code:
 
-+ `TestLocal2Lev.java`
-+ `TestLocalIEX2Lev.java`
-+ `TestLocalIEXZMF.java`
++ `org.crypto.sse.TestLocal2Lev.java`
++ `org.crypto.sse.TestLocalIEX2Lev.java`
++ `org.crypto.sse.TestLocalIEXZMF.java`
 
 ## References
 
