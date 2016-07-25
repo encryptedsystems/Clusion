@@ -563,7 +563,8 @@ public class IEX2LevAMAZON {
 		 String pass	=	keyRead.readLine();
 
 		 // You can change the size of the key; Here we set it to 128
-		 List<byte[]> listSK	= IEX2Lev.keyGen(128, pass, "salt/salt", 100);
+
+		 List<byte[]> listSK	=	IEX2Lev.keyGen(128, pass, "salt/salt", 100);
 
 		 // Generation of Local Multi-maps with Mapper job only without reducer
 
