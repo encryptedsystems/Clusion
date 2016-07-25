@@ -79,15 +79,33 @@ on [Amazon AWS](https://aws.amazon.com/fr/).
 
 + We also plan to share our Client-Server implementation for 2Lev, IEX^B-2Lev, IEX^B-ZMF once finalized. 
 
+## Build Instructions
+
++ Install Java (1.7 or above)
++ Install Maven (3.3.9 or above)
++ Download/Git clone Clusion
++ Run below commands to build the jar
+	`cd Clusion`
+	`mvn clean install`
+	`cd target`
+	`ls Clusion-1.0-SNAPSHOT-jar-with-dependencies.jar`
++ If the above file exists, build was successful and contains all dependencies
+
 ## Quick Test
 
-For a quick test, create a folder, make sure that you have all required
-libraries, store some files in the folder and enjoy!
+For a quick test, create folder and store some input files, needed jars and test classes are already created
 
-+ to test 2Lev run `org.crypto.sse.TestLocal2Lev`
-+ to test IEX-2Lev run `org.crypto.sse.TestLocalIEX2Lev`
-+ to test IEX-ZMF run `org.crypto.sse.TestLocalIEXZMF`
-+ to test IEX-2Lev on Amazon run `IEX2LevAMAZON`
++ export Java classpath
+	run `export CLASSPATH=$CLASSPATH:/home/xxx/Clusion/target:/home/xxx/Clusion/target/test-classes`
+	Ensure the directory paths are correct in the above
++ to test 2Lev 
+	run `java org.crypto.sse.TestLocal2Lev`
++ to test IEX-2Lev 
+	run `java org.crypto.sse.TestLocalIEX2Lev`
++ to test IEX-ZMF 
+	run `java org.crypto.sse.TestLocalIEXZMF`
++ to test IEX-2Lev on Amazon 
+	run `java org.crypto.sse.IEX2LevAMAZON`
 
 
 ## Documentation
