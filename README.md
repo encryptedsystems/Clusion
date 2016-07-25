@@ -10,29 +10,6 @@ worst-case.
 Clusion is provided as-is under the *Modified BSD License* (BSD-3). 
 
 
-## Requirements
-Clusion is written in Java.
-Below are Dependencies added via Maven (3.3.9 or above) 
-
-+ Bouncy Castle					https://www.bouncycastle.org/
-
-+ Apache Lucene					https://lucene.apache.org/core/
-
-+ Apache PDFBox					https://pdfbox.apache.org/
-
-+ Apache POI					https://poi.apache.org/
-
-+ Google Guava					https://poi.apache.org/
-
-+ SizeOF (needed to calculate object size in Java)	http://sizeof.sourceforge.net/
-
-+ [Hadoop-2.7.1](http://hadoop.apache.org/releases.htm) was used for our
-  distributed implementation of the IEX-2Lev setup algorithm. Earlier releases
- of Hadoop may work as well but were not tested 
-
-Clusion was tested with Java version `1.7.0_75`.
-
-
 ## Implementation
 
 *Indexing.* The indexer takes as input a folder that can contain pdf files,
@@ -85,10 +62,15 @@ on [Amazon AWS](https://aws.amazon.com/fr/).
 + Install Maven (3.3.9 or above)
 + Download/Git clone Clusion
 + Run below commands to build the jar
+
 	`cd Clusion`
+	
 	`mvn clean install`
+	
 	`cd target`
+	
 	`ls Clusion-1.0-SNAPSHOT-jar-with-dependencies.jar`
+	
 + If the above file exists, build was successful and contains all dependencies
 
 ## Quick Test
@@ -96,15 +78,24 @@ on [Amazon AWS](https://aws.amazon.com/fr/).
 For a quick test, create folder and store some input files, needed jars and test classes are already created
 
 + export Java classpath
+
 	run `export CLASSPATH=$CLASSPATH:/home/xxx/Clusion/target:/home/xxx/Clusion/target/test-classes`
+	
 	Ensure the directory paths are correct in the above
 + to test 2Lev 
+
 	run `java org.crypto.sse.TestLocal2Lev`
+	
 + to test IEX-2Lev 
+
 	run `java org.crypto.sse.TestLocalIEX2Lev`
+	
 + to test IEX-ZMF 
+
 	run `java org.crypto.sse.TestLocalIEXZMF`
+	
 + to test IEX-2Lev on Amazon 
+
 	run `java org.crypto.sse.IEX2LevAMAZON`
 
 
@@ -116,6 +107,29 @@ use the library is to read through the source of the test code:
 + `org.crypto.sse.TestLocal2Lev.java`
 + `org.crypto.sse.TestLocalIEX2Lev.java`
 + `org.crypto.sse.TestLocalIEXZMF.java`
+
+## Requirements
+Clusion is written in Java.
+
+Below are Dependencies added via Maven (3.3.9 or above) , need not be downloaded manually
+
++ Bouncy Castle					https://www.bouncycastle.org/
+
++ Apache Lucene					https://lucene.apache.org/core/
+
++ Apache PDFBox					https://pdfbox.apache.org/
+
++ Apache POI					https://poi.apache.org/
+
++ Google Guava					https://poi.apache.org/
+
++ SizeOF (needed to calculate object size in Java)	http://sizeof.sourceforge.net/
+
++ [Hadoop-2.7.1](http://hadoop.apache.org/releases.htm) was used for our
+  distributed implementation of the IEX-2Lev setup algorithm. Earlier releases
+ of Hadoop may work as well but were not tested 
+
+Clusion was tested with Java version `1.7.0_75`.
 
 ## References
 
