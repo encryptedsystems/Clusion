@@ -7,23 +7,11 @@
 //***********************************************************************************************//
 package org.crypto.sse;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import com.google.common.collect.Sets;
-
-import com.carrotsearch.sizeof.*;
 
 public class TestLocalIEX2Lev {
 

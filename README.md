@@ -11,7 +11,8 @@ Clusion is provided as-is under the *Modified BSD License* (BSD-3).
 
 
 ## Requirements
-Clusion is written in Java and has the following dependencies:
+Clusion is written in Java.
+Below are Dependencies added via Maven (3.3.9 or above) 
 
 + Bouncy Castle					https://www.bouncycastle.org/
 
