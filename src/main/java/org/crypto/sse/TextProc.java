@@ -3,26 +3,20 @@
 /////////////////////    Text Parsing with a new partitioning technique 	/////////////////////////////
 
 //***********************************************************************************************//
+package org.crypto.sse;
 
 import com.google.common.collect.Multimap;
-import java.io.BufferedWriter;
+
+import javax.crypto.NoSuchPaddingException;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
-
-import javax.crypto.NoSuchPaddingException;
 
 public class TextProc {
 

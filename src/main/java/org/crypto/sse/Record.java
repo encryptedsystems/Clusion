@@ -2,7 +2,7 @@
 // Record Object description used to better handle the matryoshka filters
 //***********************************************************************************************//
 
-
+package org.crypto.sse ;
 import java.io.Serializable;
 
 public class Record implements Serializable{

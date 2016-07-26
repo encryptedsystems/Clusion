@@ -5,25 +5,13 @@
 // One needs to wait until the complete creation of the encrypted data structures of IEX-2Lev in order to issue queries.
 // Queries need to be in the form of CNF. Follow on-line instructions
 //***********************************************************************************************//
+package org.crypto.sse;
 
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import com.google.common.collect.Sets;
-
-import net.sourceforge.sizeof.SizeOf;
 
 public class TestLocalIEX2Lev {
 
@@ -120,7 +108,7 @@ public class TestLocalIEX2Lev {
 		long startTime2 = System.nanoTime();
 
 
-		IEX2Lev	disj	=	IEX2Lev.setupDISJ(listSK, TextExtractPar.lp1, TextExtractPar.lp2, bigBlock, smallBlock, 0);
+		IEX2Lev disj	=	IEX2Lev.setupDISJ(listSK, TextExtractPar.lp1, TextExtractPar.lp2, bigBlock, smallBlock, 0);
 
 
 
@@ -135,23 +123,23 @@ public class TestLocalIEX2Lev {
 		System.out.println("\n*****************************************************************");
 
 		//System.out.println("\nNumber of keywords "+TextExtractPar.totalNumberKeywords);
-		System.out.println("\nNumber of (w, id) pairs "+TextExtractPar.lp2.size());
-		writer.write("\n Number of (w, id) pairs "+TextExtractPar.lp2.size());
+		System.out.println("\nNumber of (w, id) pairs "+ TextExtractPar.lp2.size());
+		writer.write("\n Number of (w, id) pairs "+ TextExtractPar.lp2.size());
 
 
-		System.out.println("\nTotal number of stored (w, Id) including in local MM : "+IEX2Lev.numberPairs);
-		writer.write("\n Total number of stored (w, Id) including in local MM : "+IEX2Lev.numberPairs);
+		System.out.println("\nTotal number of stored (w, Id) including in local MM : "+ IEX2Lev.numberPairs);
+		writer.write("\n Total number of stored (w, Id) including in local MM : "+ IEX2Lev.numberPairs);
 
 
-		System.out.println("\nTime elapsed per (w, Id) in ns: "+totalTime2/IEX2Lev.numberPairs);
-		writer.write("\n Time elapsed per (w, Id) in ns: "+totalTime2/IEX2Lev.numberPairs);
+		System.out.println("\nTime elapsed per (w, Id) in ns: "+totalTime2/ IEX2Lev.numberPairs);
+		writer.write("\n Time elapsed per (w, Id) in ns: "+totalTime2/ IEX2Lev.numberPairs);
 
 
 		System.out.println("\nTotal Time elapsed for the entire construction in seconds: "+totalTime2/1000000000);
 		writer.write("\n Total Time elapsed for the entire construction in seconds: "+totalTime2/1000000000);
 
-		System.out.println("\nRelative Time elapsed per (w, Id) in ns: "+totalTime2/TextExtractPar.lp1.size());
-		writer.write("\n Relative Time elapsed per (w, Id) in ns: "+totalTime2/TextExtractPar.lp1.size());
+		System.out.println("\nRelative Time elapsed per (w, Id) in ns: "+totalTime2/ TextExtractPar.lp1.size());
+		writer.write("\n Relative Time elapsed per (w, Id) in ns: "+totalTime2/ TextExtractPar.lp1.size());
 
 		// The two commented commands are used to compute the size of the encrypted Local multi-maps and global multi-maps
 

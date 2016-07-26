@@ -2,7 +2,7 @@
 // Information to manipulate Bloom Filters
 //***********************************************************************************************//
 
-
+package org.crypto.sse ;
 import java.io.Serializable;
 
 public class InvertedIndexResultFormat implements Serializable{

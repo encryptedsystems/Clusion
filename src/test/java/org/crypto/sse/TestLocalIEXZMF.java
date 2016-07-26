@@ -5,19 +5,17 @@
 // One needs to wait until the complete creation of the encrypted data structures of IEX-ZMF in order to issue Boolean queries.
 // Queries need to be in the form of CNF. Follow on-line instructions.
 //***********************************************************************************************//
+package org.crypto.sse;
 
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-
-import net.sourceforge.sizeof.SizeOf;
 
 public class TestLocalIEXZMF {
 	private static final int falsePosRate	=	25;
@@ -45,8 +43,8 @@ public class TestLocalIEXZMF {
 
 
 		long startTime2 =System.nanoTime();
-		System.out.println("Number of keywords pairs (w. id): "+TextExtractPar.lp1.size());
-		System.out.println("Number of keywords "+TextExtractPar.lp1.keySet().size());
+		System.out.println("Number of keywords pairs (w. id): "+ TextExtractPar.lp1.size());
+		System.out.println("Number of keywords "+ TextExtractPar.lp1.keySet().size());
 
 		IEXZMF.constructBFPar(new ArrayList(TextExtractPar.lp1.keySet()),listSK.get(0), listSK.get(1), maxLengthOfMask, falsePosRate);
 
@@ -75,7 +73,7 @@ public class TestLocalIEXZMF {
 		Multimap<String, Integer>	dictionaryForMM	=	null;
 		//Construction by Cash et al NDSS 2014
 
-		IEX2Lev	disj	=	new IEX2Lev(MMGlobal.constructEMMPar(listSK.get(1), TextExtractPar.lp1, bigBlock, smallBlock, dataSize), localMultiMap, dictionaryForMM);
+		IEX2Lev disj	=	new IEX2Lev(MMGlobal.constructEMMPar(listSK.get(1), TextExtractPar.lp1, bigBlock, smallBlock, dataSize), localMultiMap, dictionaryForMM);
 
 		// The line below creates a Global multi-map based on the TSet by Cash et al. Crypto'13. It is commented as we have implemented a faster instantiation of encrypted multi-map based 
 		// on the construction by Cash et al. NDSS'14

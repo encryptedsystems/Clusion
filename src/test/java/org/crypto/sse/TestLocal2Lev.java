@@ -2,19 +2,11 @@
 // This file is to test the 2Lev construction by Cash et al. NDSS'14. 
 //**********************************************************************************************
 
+package org.crypto.sse;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 
 
 public class TestLocal2Lev {
@@ -52,7 +44,7 @@ public class TestLocal2Lev {
 		//Construction of the global multi-map
 		System.out.println("\nBeginning of Global MM creation \n");
 
-		MMGlobal	twolev	=	MMGlobal.constructEMMPar(listSK.get(0), TextExtractPar.lp1, bigBlock, smallBlock, dataSize);
+		MMGlobal twolev	=	MMGlobal.constructEMMPar(listSK.get(0), TextExtractPar.lp1, bigBlock, smallBlock, dataSize);
 
 
 		while (true){
