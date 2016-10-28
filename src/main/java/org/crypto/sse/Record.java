@@ -2,17 +2,18 @@
 // Record Object description used to better handle the matryoshka filters
 //***********************************************************************************************//
 
-package org.crypto.sse ;
+package org.crypto.sse;
+
 import java.io.Serializable;
 
-public class Record implements Serializable{
+public class Record implements Serializable {
 
 	byte[] label;
 	byte[] value;
 
-	public Record(byte[] label, byte[] value){
-		this.label=label;
-		this.value=value;
+	public Record(byte[] label, byte[] value) {
+		this.label = label;
+		this.value = value;
 	}
 
 	public byte[] getLabel() {
@@ -30,6 +31,5 @@ public class Record implements Serializable{
 	public void setValue(byte[] value) {
 		this.value = value;
 	}
-
 
 }

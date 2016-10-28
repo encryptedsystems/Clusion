@@ -1,6 +1,6 @@
 //***********************************************************************************************//
 
-// This file contains IEX-2Lev implementation. KeyGen, Setup, Token and Test algorithms. 
+// This file contains IEX-2Lev implementation for response hiding. KeyGen, Setup, Token and Test algorithms. 
 // We also propose an implementation of a possible filtering mechanism that reduces the storage overhead. 
 
 //***********************************************************************************************//	
@@ -21,38 +21,36 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
-public class IEX2Lev implements Serializable {
+public class IEXRH2Lev implements Serializable {
 
 	// Parameter of Disjunctive search
 	public static int maxDocumentIDs = 0;
-
 	// Change it based on data distribution and storage restrictions
 	static double filterParameter = 0;
-
 	public static long numberPairs = 0;
-	MMGlobal globalMM = null;
-	MMGlobal[] localMultiMap = null;
+	RH2Lev globalMM = null;
+	RH2Lev[] localMultiMap = null;
 	Multimap<String, Integer> dictionaryForMM = null;
 
-	public IEX2Lev(MMGlobal globalMM, MMGlobal[] localMultiMap, Multimap<String, Integer> dictionaryForMM) {
+	public IEXRH2Lev(RH2Lev globalMM, RH2Lev[] localMultiMap, Multimap<String, Integer> dictionaryForMM) {
 		this.globalMM = globalMM;
 		this.localMultiMap = localMultiMap;
 		this.dictionaryForMM = dictionaryForMM;
 	}
 
-	public MMGlobal getGlobalMM() {
+	public RH2Lev getGlobalMM() {
 		return globalMM;
 	}
 
-	public void setGlobalMM(MMGlobal globalMM) {
+	public void setGlobalMM(RH2Lev globalMM) {
 		this.globalMM = globalMM;
 	}
 
-	public MMGlobal[] getLocalMultiMap() {
+	public RH2Lev[] getLocalMultiMap() {
 		return localMultiMap;
 	}
 
-	public void setLocalMultiMap(MMGlobal[] localMultiMap) {
+	public void setLocalMultiMap(RH2Lev[] localMultiMap) {
 		this.localMultiMap = localMultiMap;
 	}
 
@@ -92,18 +90,20 @@ public class IEX2Lev implements Serializable {
 
 	// ***********************************************************************************************//
 
-	public static IEX2Lev setupDISJ(List<byte[]> keys, Multimap<String, String> lookup,
+	public static IEXRH2Lev setupDISJ(List<byte[]> keys, Multimap<String, String> lookup,
 			Multimap<String, String> lookup2, int bigBlock, int smallBlock, int dataSize)
 			throws InterruptedException, ExecutionException, IOException {
 
 		// Instantiation of the object that contains Global MM, Local MMs and
 		// the dictionary
-		MMGlobal[] localMultiMap = new MMGlobal[lookup.keySet().size()];
+		RH2Lev[] localMultiMap = new RH2Lev[lookup.keySet().size()];
 		Multimap<String, Integer> dictionaryForMM = ArrayListMultimap.create();
 
 		System.out.println("Number of (w, id) pairs " + lookup.size());
 
 		System.out.println("Number of keywords " + lookup.keySet().size());
+
+		System.out.println("Maximum size of |DB(w)| " + TextExtractPar.maxTupleSize);
 
 		BufferedWriter writer = new BufferedWriter(new FileWriter("logs.txt", true));
 
@@ -141,7 +141,7 @@ public class IEX2Lev implements Serializable {
 
 		long startTime1 = System.nanoTime();
 
-		IEX2Lev disj2 = new IEX2Lev(MMGlobal.constructEMMParGMM(keys.get(0), lookup, bigBlock, smallBlock, dataSize),
+		IEXRH2Lev disj2 = new IEXRH2Lev(RH2Lev.constructEMMParGMM(keys.get(0), lookup, bigBlock, smallBlock, dataSize),
 				localMultiMap, dictionaryForMM);
 
 		long endTime1 = System.nanoTime();
@@ -213,9 +213,13 @@ public class IEX2Lev implements Serializable {
 				}
 
 				// End of VW construction
-				MMGlobal.counter = 0;
+				RH2Lev.counter = 0;
+
 				// dataSize = (int) filterParameter;
-				disj2.getLocalMultiMap()[counter] = MMGlobal.constructEMMParGMM(
+				RH2Lev.eval = 4 + keyword;
+				RH2Lev.lmm = true;
+
+				disj2.getLocalMultiMap()[counter] = RH2Lev.constructEMMParGMM(
 						CryptoPrimitives.generateCmac(keys.get(0), keyword), secondaryLookup, bigBlock, smallBlock,
 						dataSize);
 				byte[] key3 = CryptoPrimitives.generateCmac(keys.get(1), 3 + keyword);
@@ -266,14 +270,14 @@ public class IEX2Lev implements Serializable {
 
 	// ***********************************************************************************************//
 
-	public static Set<String> testDIS(List<TokenDIS> token, IEX2Lev disj)
+	public static Set<String> testDIS(List<TokenDIS> token, IEXRH2Lev disj)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
 			NoSuchProviderException, NoSuchPaddingException, IOException {
 
 		Set<String> finalResult = new TreeSet<String>();
 		for (int i = 0; i < token.size(); i++) {
 
-			Set<String> result = new HashSet<String>(MMGlobal.testSI(token.get(i).getTokenMMGlobal(),
+			Set<String> result = new HashSet<String>(RH2Lev.testSI(token.get(i).getTokenMMGlobal(),
 					disj.getGlobalMM().getDictionary(), disj.getGlobalMM().getArray()));
 
 			if (!(result.size() == 0)) {
@@ -286,11 +290,11 @@ public class IEX2Lev implements Serializable {
 					for (int j = 0; j < token.get(i).getTokenMMLocal().size(); j++) {
 
 						Set<String> temporary = new HashSet<String>();
-						List<String> tempoList = MMGlobal.testSI(token.get(i).getTokenMMLocal().get(j),
+						List<String> tempoList = RH2Lev.testSI(token.get(i).getTokenMMLocal().get(j),
 								disj.getLocalMultiMap()[pos].getDictionary(), disj.getLocalMultiMap()[pos].getArray());
 
 						if (!(tempoList == null)) {
-							temporary = new HashSet<String>(MMGlobal.testSI(token.get(i).getTokenMMLocal().get(j),
+							temporary = new HashSet<String>(RH2Lev.testSI(token.get(i).getTokenMMLocal().get(j),
 									disj.getLocalMultiMap()[pos].getDictionary(),
 									disj.getLocalMultiMap()[pos].getArray()));
 						}

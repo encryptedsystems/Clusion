@@ -5,7 +5,7 @@
 
 //***********************************************************************************************//	
 
-package org.crypto.sse ;
+package org.crypto.sse;
 
 import com.google.common.collect.Multimap;
 
@@ -23,282 +23,252 @@ import java.util.concurrent.*;
 
 public class InvertedIndex {
 
+	public final static int spaceOverhead = 2;
+	public final static int subBucketSize = 200;
+	public static int bucketSize = 0;
+	public static List<List<Integer>> free = new ArrayList<List<Integer>>();
+	static List<List<Record>> secureIndex = new ArrayList<List<Record>>();
 
-	public final static int spaceOverhead	=	2;
-	public final static int subBucketSize	=	200;
-	public static int bucketSize=0;
-	public static List<List<Integer>> free	=	new ArrayList<List<Integer>>();
-	static List<List<Record>> secureIndex	=	new ArrayList<List<Record>>();
+	// security parameter in bytes
 
+	public static int securityParameter = 16;
 
-	//security parameter in bytes
+	// Here we need 1 byte for beta, 16 bytes for the IV, 60 bytes for the
+	// identifier and 10 bytes for the SecureSetM identifier
+	public static int valueSize = 87;
 
-	public static int securityParameter	=	16;
+	// Not necessary private, just used for the instantiation of the HMAC
 
-	// Here we need 1 byte for beta, 16 bytes for the IV, 60 bytes for the identifier and 10 bytes for the SecureSetM identifier
-	public static int valueSize	=	87;
+	public static final byte[] keyHMACSI = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b,
+			0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17 };
 
+	// ***********************************************************************************************//
 
-	//Not necessary private, just used for the instantiation of the HMAC
+	///////////////////// KeyGenSI /////////////////////////////
 
-	public static final byte[] keyHMACSI= { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09,
-		0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17};
+	// ***********************************************************************************************//
 
-
-	//***********************************************************************************************//
-
-	/////////////////////    KeyGenSI	/////////////////////////////
-
-	//***********************************************************************************************//	
-
-	public static byte[] keyGenSI(int keySize, String password, String filePathString, int icount) throws InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException{
+	public static byte[] keyGenSI(int keySize, String password, String filePathString, int icount)
+			throws InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException {
 		File f = new File(filePathString);
-		byte[] salt=null;
+		byte[] salt = null;
 
-
-
-		if (f.exists() && !f.isDirectory()){
-			salt=CryptoPrimitives.readAlternateImpl(filePathString);
-		}
-		else{
-			salt=CryptoPrimitives.randomBytes(8);
+		if (f.exists() && !f.isDirectory()) {
+			salt = CryptoPrimitives.readAlternateImpl(filePathString);
+		} else {
+			salt = CryptoPrimitives.randomBytes(8);
 			CryptoPrimitives.write(salt, "saltInvIX", "salt");
 
 		}
 
-		byte[] key=CryptoPrimitives.keyGenSetM(password, salt, icount, keySize);
+		byte[] key = CryptoPrimitives.keyGenSetM(password, salt, icount, keySize);
 		return key;
 
 	}
 
+	// ***********************************************************************************************//
 
-	//***********************************************************************************************//
+	///////////////////// SetupSI without partitioning
+	///////////////////// /////////////////////////////
 
-	/////////////////////    SetupSI without partitioning	/////////////////////////////
+	// ***********************************************************************************************//
 
-	//***********************************************************************************************//		
+	public static int setupSI(byte[] key1, byte[] key2, byte[] keyENC, String[] listOfKeyword,
+			Multimap<String, String> lookup, Multimap<String, String> encryptedIdToRealId)
+			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
+			NoSuchProviderException, NoSuchPaddingException, IOException {
 
-
-	public static int setupSI(byte[] key1, byte[] key2, byte[] keyENC, String[] listOfKeyword, Multimap<String, String> lookup, Multimap<String, String> encryptedIdToRealId) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException{
-
-		int globalCounter =0;
-		for (String word	:	listOfKeyword){
+		int globalCounter = 0;
+		for (String word : listOfKeyword) {
 
 			// Computation of the keyword tag
 
-			byte[] tag1	=	CryptoPrimitives.generateCmac(key1, word);
-			byte[] tag2	=	CryptoPrimitives.generateCmac(key2, word);
+			byte[] tag1 = CryptoPrimitives.generateCmac(key1, word);
+			byte[] tag2 = CryptoPrimitives.generateCmac(key2, word);
 
 			// Extraction of all documents identifiers associated to the word
 
-			Collection<String>	documents=	lookup.get(word);
+			Collection<String> documents = lookup.get(word);
 
-			int counter =	0;
+			int counter = 0;
 
-			//initialize beta to be equal to zero
-			int beta	=	1;
+			// initialize beta to be equal to zero
+			int beta = 1;
 
+			for (String id : documents) {
 
-			for (String id : documents){
+				// Compute the hash of the tag alongside with the counter
 
-
-
-				//Compute the hash of the tag alongside with the counter
-
-				byte[]	hmac	=	CryptoPrimitives.concat(CryptoPrimitives.generateHmac512(keyHMACSI, Integer.toString(CryptoPrimitives.getIntFromByte(CryptoPrimitives.generateCmac(tag1, Integer.toString(counter)),128))),CryptoPrimitives.generateHmac512(keyHMACSI, Integer.toString(CryptoPrimitives.getIntFromByte(CryptoPrimitives.generateCmac(tag2, Integer.toString(counter)),128))));
-
-
-
+				byte[] hmac = CryptoPrimitives.concat(
+						CryptoPrimitives.generateHmac512(keyHMACSI,
+								Integer.toString(CryptoPrimitives.getIntFromByte(
+										CryptoPrimitives.generateCmac(tag1, Integer.toString(counter)), 128))),
+						CryptoPrimitives.generateHmac512(keyHMACSI, Integer.toString(CryptoPrimitives
+								.getIntFromByte(CryptoPrimitives.generateCmac(tag2, Integer.toString(counter)), 128))));
 
 				// Determine the needed number of bytes for the bucket
 				// Divide the result of the hash in three different values
 
-				int numberOfBytes	=	(int) Math.ceil((Math.log(bucketSize)/(Math.log(2)*8)));
+				int numberOfBytes = (int) Math.ceil((Math.log(bucketSize) / (Math.log(2) * 8)));
 
 				byte[] bucket = new byte[numberOfBytes];
 
-
-
-				byte[] labelAndValue = new byte[securityParameter	+	valueSize];
+				byte[] labelAndValue = new byte[securityParameter + valueSize];
 				System.arraycopy(hmac, 0, bucket, 0, bucket.length);
 				System.arraycopy(hmac, bucket.length, labelAndValue, 0, labelAndValue.length);
 
-				if (free.get(CryptoPrimitives.getIntFromByte(bucket, (int) (Math.log(bucketSize)/(Math.log(2))))).isEmpty()){
+				if (free.get(CryptoPrimitives.getIntFromByte(bucket, (int) (Math.log(bucketSize) / (Math.log(2)))))
+						.isEmpty()) {
 					System.out.println("Sub-Buckets are not big enough ==> re-do the process with a new key");
 					System.exit(0);
 				}
 
 				// generate the integer which is associated to free[b]
 
+				byte[] randomBytes = CryptoPrimitives.randomBytes((int) Math.ceil((Math.log(
+						free.get(CryptoPrimitives.getIntFromByte(bucket, (int) (Math.log(bucketSize) / (Math.log(2)))))
+								.size())
+						/ (Math.log(2) * 8))));
 
-				byte[] randomBytes	=	CryptoPrimitives.randomBytes((int) Math.ceil((Math.log(free.get(CryptoPrimitives.getIntFromByte(bucket, (int) (Math.log(bucketSize)/(Math.log(2)))  )).size())/(Math.log(2)*8))));
+				int position = CryptoPrimitives.getIntFromByte(randomBytes,
+						(int) Math.ceil(Math.log(free.get(
+								CryptoPrimitives.getIntFromByte(bucket, (int) (Math.log(bucketSize) / (Math.log(2)))))
+								.size()) / Math.log(2)));
 
-				int position	=	CryptoPrimitives.getIntFromByte(randomBytes, (int) Math.ceil(Math.log(free.get(CryptoPrimitives.getIntFromByte(bucket, (int) (Math.log(bucketSize)/(Math.log(2))))).size())/Math.log(2)));
-
-
-
-				while (position>=free.get(CryptoPrimitives.getIntFromByte(bucket, (int) (Math.log(bucketSize)/(Math.log(2))))).size()){
-					position=position/2;
+				while (position >= free
+						.get(CryptoPrimitives.getIntFromByte(bucket, (int) (Math.log(bucketSize) / (Math.log(2)))))
+						.size()) {
+					position = position / 2;
 				}
 
+				int valueOfSubBucket = free
+						.get(CryptoPrimitives.getIntFromByte(bucket, (int) (Math.log(bucketSize) / (Math.log(2)))))
+						.get(position);
 
-
-				int valueOfSubBucket	=	free.get(CryptoPrimitives.getIntFromByte(bucket, (int) (Math.log(bucketSize)/(Math.log(2))))).get(position);
-
-				free.get(CryptoPrimitives.getIntFromByte(bucket, (int) (Math.log(bucketSize)/(Math.log(2))))).remove(position);
-
+				free.get(CryptoPrimitives.getIntFromByte(bucket, (int) (Math.log(bucketSize) / (Math.log(2)))))
+						.remove(position);
 
 				// The last document
-				if (counter	== documents.size()-1){
-					beta	=	0;
+				if (counter == documents.size() - 1) {
+					beta = 0;
 				}
 
-				byte[] label	=	new byte[securityParameter];
-				byte[] value	=	new byte[valueSize];
+				byte[] label = new byte[securityParameter];
+				byte[] value = new byte[valueSize];
 				System.arraycopy(labelAndValue, 0, label, 0, label.length);
 				System.arraycopy(labelAndValue, label.length, value, 0, value.length);
 
-
-				secureIndex.get(CryptoPrimitives.getIntFromByte(bucket, (int) (Math.log(bucketSize)/(Math.log(2))))).get(valueOfSubBucket).setLabel(label);
-
-
-
+				secureIndex.get(CryptoPrimitives.getIntFromByte(bucket, (int) (Math.log(bucketSize) / (Math.log(2)))))
+						.get(valueOfSubBucket).setLabel(label);
 
 				// Computation of masked value
-				Iterator<String> itr	=	encryptedIdToRealId.get(id).iterator();
-				byte [] identifierBytes	=	CryptoPrimitives.encryptAES_CTR_String(keyENC, CryptoPrimitives.randomBytes(16),itr.next(), 60);
+				Iterator<String> itr = encryptedIdToRealId.get(id).iterator();
+				byte[] identifierBytes = CryptoPrimitives.encryptAES_CTR_String(keyENC,
+						CryptoPrimitives.randomBytes(16), itr.next(), 60);
 
+				byte[] identifierBF = new byte[10];
+				String idBF = Integer.toString(globalCounter);
 
-				byte[] identifierBF	=	new byte[10];
-				String idBF	= Integer.toString(globalCounter);
-
-				while (idBF.length()<10){
-					idBF	=	"0"+idBF;
+				while (idBF.length() < 10) {
+					idBF = "0" + idBF;
 				}
 
-				for (int h=0; h<10;h++){
-					identifierBF[h]	=	(byte) idBF.charAt(h);
+				for (int h = 0; h < 10; h++) {
+					identifierBF[h] = (byte) idBF.charAt(h);
 				}
 
+				byte[] betaByte = { (byte) beta };
 
-				byte[] betaByte	= {(byte) beta};
-
-
-				byte[] concatenation	=	CryptoPrimitives.concat(betaByte, identifierBytes);
-				concatenation	=	CryptoPrimitives.concat(concatenation, identifierBF);
-
-
-
-
-
+				byte[] concatenation = CryptoPrimitives.concat(betaByte, identifierBytes);
+				concatenation = CryptoPrimitives.concat(concatenation, identifierBF);
 
 				int k = 0;
-				for (byte b : value){
+				for (byte b : value) {
 					value[k] = (byte) (b ^ concatenation[k++]);
 				}
-				secureIndex.get(CryptoPrimitives.getIntFromByte(bucket, (int) (Math.log(bucketSize)/(Math.log(2))))).get(valueOfSubBucket).setValue(value);
-
+				secureIndex.get(CryptoPrimitives.getIntFromByte(bucket, (int) (Math.log(bucketSize) / (Math.log(2)))))
+						.get(valueOfSubBucket).setValue(value);
 
 				counter++;
 				globalCounter++;
 
-
-
 			}
-		}	
-
+		}
 
 		return 1;
 	}
 
+	// ***********************************************************************************************//
 
+	///////////////////// Setup Parallel/////////////////////////////
 
-	//***********************************************************************************************//
+	// ***********************************************************************************************//
 
-	/////////////////////    Setup	Parallel/////////////////////////////
-
-	//***********************************************************************************************//	
-
-
-
-
-	public static void constructEMMPar(final byte[] key1, final byte[] key2, final byte[] keyENC, final Multimap<String, String> lookup, final Multimap<String, String> encryptedIdToRealId)
+	public static void constructEMMPar(final byte[] key1, final byte[] key2, final byte[] keyENC,
+			final Multimap<String, String> lookup, final Multimap<String, String> encryptedIdToRealId)
 			throws InterruptedException, ExecutionException, IOException {
 
-
-		//Instantiation of B buckets in the secure inverted index
+		// Instantiation of B buckets in the secure inverted index
 		// Initialize of the free set
 
-
-		// Determination of the bucketSize B		
-		bucketSize	=	lookup.size() * spaceOverhead;
-		int count=2;
-		for (int j=1;j<1000;j++){
-			if (bucketSize >Math.pow(2, count)){
-				count	=	2 *j;
-			}
-			else{
+		// Determination of the bucketSize B
+		bucketSize = lookup.size() * spaceOverhead;
+		int count = 2;
+		for (int j = 1; j < 1000; j++) {
+			if (bucketSize > Math.pow(2, count)) {
+				count = 2 * j;
+			} else {
 				break;
 			}
-		}	
+		}
 
-		bucketSize	=	(int) Math.pow(2, count);
+		bucketSize = (int) Math.pow(2, count);
 
-
-		for (int i=0; i<bucketSize;	i++){
+		for (int i = 0; i < bucketSize; i++) {
 			secureIndex.add(new ArrayList<Record>());
 			free.add(new ArrayList<Integer>());
 			// For each bucket initialize to S sub-buckets
-			for (int j=0;j<subBucketSize;	j++){
-				//initialize all buckets with random values
+			for (int j = 0; j < subBucketSize; j++) {
+				// initialize all buckets with random values
 				secureIndex.get(i).add(new Record(new byte[16], new byte[16]));
 				free.get(i).add(j);
 			}
 		}
 
-
-
-
-		List<String> listOfKeyword	=	new ArrayList<String>(lookup.keySet());
-		int threads =0;
-		if (Runtime.getRuntime().availableProcessors()>listOfKeyword.size()){
+		List<String> listOfKeyword = new ArrayList<String>(lookup.keySet());
+		int threads = 0;
+		if (Runtime.getRuntime().availableProcessors() > listOfKeyword.size()) {
 			threads = listOfKeyword.size();
-		}
-		else{
+		} else {
 			threads = Runtime.getRuntime().availableProcessors();
 		}
 
-
-
 		ExecutorService service = Executors.newFixedThreadPool(threads);
-		ArrayList<String[]> inputs=new ArrayList<String[]>(threads);
+		ArrayList<String[]> inputs = new ArrayList<String[]>(threads);
 
-		for (int i=0;i<threads;i++){
+		for (int i = 0; i < threads; i++) {
 			String[] tmp;
-			if (i	==	threads-1){
-				tmp=new String[listOfKeyword.size()/threads	+	listOfKeyword.size() % threads];
-				for (int j=0;j<listOfKeyword.size()/threads	+	listOfKeyword.size() % threads;j++){
-					tmp[j]=listOfKeyword.get((listOfKeyword.size()/threads)	*	i	+	j);
+			if (i == threads - 1) {
+				tmp = new String[listOfKeyword.size() / threads + listOfKeyword.size() % threads];
+				for (int j = 0; j < listOfKeyword.size() / threads + listOfKeyword.size() % threads; j++) {
+					tmp[j] = listOfKeyword.get((listOfKeyword.size() / threads) * i + j);
 				}
-			}
-			else{
-				tmp=new String[listOfKeyword.size()/threads];
-				for (int j=0;j<listOfKeyword.size()/threads;j++){
+			} else {
+				tmp = new String[listOfKeyword.size() / threads];
+				for (int j = 0; j < listOfKeyword.size() / threads; j++) {
 
-					tmp[j]=listOfKeyword.get((listOfKeyword.size()/threads)	*	i	+	j);
+					tmp[j] = listOfKeyword.get((listOfKeyword.size() / threads) * i + j);
 				}
 			}
 			inputs.add(i, tmp);
 		}
 
-
-
-		List<Future<Integer >> futures = new ArrayList<Future<Integer  >>();
+		List<Future<Integer>> futures = new ArrayList<Future<Integer>>();
 		for (final String[] input : inputs) {
-			Callable<Integer> callable = new Callable<Integer >() {
-				public Integer   call() throws Exception {
+			Callable<Integer> callable = new Callable<Integer>() {
+				public Integer call() throws Exception {
 
-					int  output =	setupSI(key1, key2, keyENC, input, lookup, encryptedIdToRealId);   
+					int output = setupSI(key1, key2, keyENC, input, lookup, encryptedIdToRealId);
 					return 1;
 				}
 			};
@@ -309,126 +279,118 @@ public class InvertedIndex {
 
 	}
 
+	// ***********************************************************************************************//
 
+	///////////////////// GenTokSI /////////////////////////////
 
-	//***********************************************************************************************//
+	// ***********************************************************************************************//
 
-	/////////////////////    GenTokSI	/////////////////////////////
-
-	//***********************************************************************************************//	
-
-	public static byte[]	genTokSI(byte[] key, String keyword) throws UnsupportedEncodingException{
-		byte[] result	= CryptoPrimitives.generateCmac(key, keyword);
+	public static byte[] genTokSI(byte[] key, String keyword) throws UnsupportedEncodingException {
+		byte[] result = CryptoPrimitives.generateCmac(key, keyword);
 		return result;
 	}
 
+	// ***********************************************************************************************//
 
+	///////////////////// TestSI without partitioning
+	///////////////////// /////////////////////////////
 
-	//***********************************************************************************************//
+	// ***********************************************************************************************//
 
-	/////////////////////    TestSI without partitioning	/////////////////////////////
-
-	//***********************************************************************************************//	
-
-
-	public static List<InvertedIndexResultFormat> testSI(byte[] token1, byte[] token2, List<List<Record>> secureIndex, int bucketSize) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException{
-		List<InvertedIndexResultFormat> result	=	new ArrayList<InvertedIndexResultFormat>();
+	public static List<InvertedIndexResultFormat> testSI(byte[] token1, byte[] token2, List<List<Record>> secureIndex,
+			int bucketSize) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
+			NoSuchProviderException, NoSuchPaddingException, IOException {
+		List<InvertedIndexResultFormat> result = new ArrayList<InvertedIndexResultFormat>();
 
 		// initialize beta to 1
-		int beta	=	1;
+		int beta = 1;
 
 		// initialize the counter to 0
 
-		int counter	=	0;
+		int counter = 0;
 
+		int numberOfBytes = (int) Math.ceil((Math.log(bucketSize) / (Math.log(2) * 8)));
 
-		int numberOfBytes	=	(int) Math.ceil((Math.log(bucketSize)/(Math.log(2)*8)));
+		// security parameter in bytes defines the label while the value size
+		// defines the concatenation of the beta, the identifier of the document
+		// and the pointer to the bloom filter
 
+		int securityParameter = 16;
+		int valueSize = 87;
 
-		//security parameter in bytes defines the label while the value size defines the concatenation of the beta, the identifier of the document and the pointer to the bloom filter 
+		while (beta != 0) {
+			// Generate the HMAC based for each identifier
+			byte[] hmac = CryptoPrimitives.concat(
+					CryptoPrimitives.generateHmac512(keyHMACSI,
+							Integer.toString(CryptoPrimitives.getIntFromByte(
+									CryptoPrimitives.generateCmac(token1, Integer.toString(counter)), 128))),
+					CryptoPrimitives.generateHmac512(keyHMACSI, Integer.toString(CryptoPrimitives
+							.getIntFromByte(CryptoPrimitives.generateCmac(token2, Integer.toString(counter)), 128))));
 
-		int securityParameter	=	16;
-		int valueSize	=	87;
-
-
-
-
-
-		while (beta !=	0){
-			//Generate the HMAC based for each identifier
-			byte[]	hmac	=	CryptoPrimitives.concat(CryptoPrimitives.generateHmac512(keyHMACSI, Integer.toString(CryptoPrimitives.getIntFromByte(CryptoPrimitives.generateCmac(token1, Integer.toString(counter)),128))),CryptoPrimitives.generateHmac512(keyHMACSI, Integer.toString(CryptoPrimitives.getIntFromByte(CryptoPrimitives.generateCmac(token2, Integer.toString(counter)),128))));
-
-
-
-
-			// parsing the result of the random 
-			byte[] bucket 	= 	new byte[numberOfBytes];
-			byte[] label	=	new byte[securityParameter];
-			byte[] value	=	new byte[valueSize];
-
+			// parsing the result of the random
+			byte[] bucket = new byte[numberOfBytes];
+			byte[] label = new byte[securityParameter];
+			byte[] value = new byte[valueSize];
 
 			System.arraycopy(hmac, 0, bucket, 0, bucket.length);
 			System.arraycopy(hmac, bucket.length, label, 0, label.length);
-			System.arraycopy(hmac, bucket.length+label.length, value, 0, value.length);
+			System.arraycopy(hmac, bucket.length + label.length, value, 0, value.length);
 
-			int counterWorNotExist	=	0;
+			int counterWorNotExist = 0;
 
-			boolean flag2= false;
-			for (Record record : secureIndex.get(CryptoPrimitives.getIntFromByte(bucket, (int) (Math.log(bucketSize)/(Math.log(2)))))){
+			boolean flag2 = false;
+			for (Record record : secureIndex
+					.get(CryptoPrimitives.getIntFromByte(bucket, (int) (Math.log(bucketSize) / (Math.log(2)))))) {
 
-				if (Arrays.equals(record.getLabel(),label)){
+				if (Arrays.equals(record.getLabel(), label)) {
 
-					flag2	=	true;
+					flag2 = true;
 					// De-masking the value
 
 					int k = 0;
-					for (byte b : value){
+					for (byte b : value) {
 						value[k] = (byte) (b ^ record.getValue()[k++]);
 					}
 
-					// Spliting the array "value" to FLAG + TITLE + BF IDENTIFIER
+					// Spliting the array "value" to FLAG + TITLE + BF
+					// IDENTIFIER
 					byte[] flagByte = new byte[1];
 					byte[] docId = new byte[76];
 					byte[] bFId = new byte[10];
 
 					System.arraycopy(value, 0, flagByte, 0, flagByte.length);
 					System.arraycopy(value, flagByte.length, docId, 0, docId.length);
-					System.arraycopy(value, flagByte.length+docId.length, bFId, 0, bFId.length);
-
-
+					System.arraycopy(value, flagByte.length + docId.length, bFId, 0, bFId.length);
 
 					// instantiation of the record encoding
-					String valueMatch	=	"";
+					String valueMatch = "";
 
-					for (int s=0; s<value.length; s++){
-						valueMatch	=	valueMatch + (char) value[s];
+					for (int s = 0; s < value.length; s++) {
+						valueMatch = valueMatch + (char) value[s];
 					}
 
-
 					// checking if it is the last identifier
-					if (String.valueOf(flagByte[0]).charAt(0) == '0'){
-						beta	=	0;
+					if (String.valueOf(flagByte[0]).charAt(0) == '0') {
+						beta = 0;
 					}
 
 					// return the string of the identifier and the bloom filter
 
-
 					result.add(new InvertedIndexResultFormat(docId, bFId));
 
-				}
-				else if ((counterWorNotExist	== secureIndex.get(CryptoPrimitives.getIntFromByte(bucket, (int) (Math.log(bucketSize)/(Math.log(2))))).size()-1) && (flag2==false)){
+				} else if ((counterWorNotExist == secureIndex
+						.get(CryptoPrimitives.getIntFromByte(bucket, (int) (Math.log(bucketSize) / (Math.log(2)))))
+						.size() - 1) && (flag2 == false)) {
 					// the word searched for does not exists
-					beta	=0;
+					beta = 0;
 				}
 
 				counterWorNotExist++;
 
 			}
 
-
 			counter++;
 		}
-
 
 		return result;
 	}

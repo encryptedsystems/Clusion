@@ -19,7 +19,7 @@ public class Token implements Serializable{
 	public byte[][] tokenMMGlobal;
 	public byte[] tokenSI1;
 	public byte[] tokenSI2;
-	public List<List<String>> tokenSM	=	new ArrayList<List<String>>();
+	public List<List<byte[]>> tokenSM	=	new ArrayList<List<byte[]>>();
 
 
 
@@ -30,7 +30,7 @@ public class Token implements Serializable{
 		this.tokenSI1	=	InvertedIndex.genTokSI(listOfkeys.get(1), subSearch.get(0));
 
 		for (int i=1; i<subSearch.size(); i++){
-			tokenSM.add(SecureSetM.genTokSM(listOfkeys.get(0), subSearch.get(0), subSearch.get(i), maxLengthOfMask, falsePosRate));
+			tokenSM.add(ZMF.genTokSMV2(listOfkeys.get(0), subSearch.get(0), subSearch.get(i), maxLengthOfMask, falsePosRate));
 		}
 
 	}
@@ -62,13 +62,13 @@ public class Token implements Serializable{
 
 
 
-	public List<List<String>> getTokenSM() {
+	public List<List<byte[]>> getTokenSM() {
 		return tokenSM;
 	}
 
 
 
-	public void setTokenSM(List<List<String>> tokenSM) {
+	public void setTokenSM(List<List<byte[]>> tokenSM) {
 		this.tokenSM = tokenSM;
 	}
 

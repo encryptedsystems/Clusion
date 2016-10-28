@@ -5,6 +5,10 @@
 
 //***********************************************************************************************//	
 
+//This Class is associated to the first version of multi-map encryption scheme (in the OXT paper) where the BF ids are stored in the EMM itself. This class needs to be
+//modified in such a way that the BF are not in the EMM
+//In order to use this class the documents identifiers have to be encrypted before being fed to the scheme
+
 package org.crypto.sse;
 
 import javax.crypto.NoSuchPaddingException;
@@ -16,412 +20,321 @@ import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.*;
 
+public class IEXZMF implements Serializable {
 
+	public static int numberOfBF = 0;
+	public static int numberOfkeywordsProcessed = 0;
+	public static double filterParameter = 0.2;
 
-public class IEXZMF implements Serializable{
-
-
-	public static int numberOfBF	= 0;
-	public static List<SecureSetMFormat> bloomFilterList	=	new ArrayList<SecureSetMFormat>();
+	public static List<SecureSetMFormat> bloomFilterList = new ArrayList<SecureSetMFormat>();
 	public static HashMap<String, SecureSetMFormat> bloomFilterMap = new HashMap<String, SecureSetMFormat>();
-	public static HashMap<String, List<String>> bloomFilterStart = new HashMap<String, List<String>>();
+	public static HashMap<String, List<Integer>> bloomFilterStart = new HashMap<String, List<Integer>>();
+	public static HashMap<Integer, String> bloomFilterID = new HashMap<Integer, String>();
 
-	//***********************************************************************************************//
+	// ***********************************************************************************************//
 
-	/////////////////////    KeyGen	/////////////////////////////
+	///////////////////// KeyGen /////////////////////////////
 
-	//***********************************************************************************************//	
+	// ***********************************************************************************************//
 
+	public static List<byte[]> keyGen(int keySize, String password, String filePathString, int icount)
+			throws InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException {
 
-	public static List<byte[]> keyGen(int keySize, String password, String filePathString, int icount) throws InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException{
-
-		List<byte[]> listOfkeys	=	 new ArrayList<byte[]>();
+		List<byte[]> listOfkeys = new ArrayList<byte[]>();
 
 		// Generation of the key for Secure Set membership
-		listOfkeys.add(SecureSetM.keyGenSM(keySize*3, password+"setM", filePathString, icount));
+		listOfkeys.add(ZMF.keyGenSM(keySize * 3, password + "setM", filePathString, icount));
 
 		// Generation of two keys for Secure inverted index
-		listOfkeys.add(InvertedIndex.keyGenSI(keySize, password+"secureIndex1", filePathString, icount));
-		listOfkeys.add(InvertedIndex.keyGenSI(keySize, password+"secureIndex2", filePathString, icount));
+		listOfkeys.add(InvertedIndex.keyGenSI(keySize, password + "secureIndex1", filePathString, icount));
+		listOfkeys.add(InvertedIndex.keyGenSI(keySize, password + "secureIndex2", filePathString, icount));
 
 		// Generation of one key for encryption
-		listOfkeys.add(SecureSetM.keyGenSM(keySize, password+"encryption", filePathString, icount));
+		listOfkeys.add(ZMF.keyGenSM(keySize, password + "encryption", filePathString, icount));
 
 		return listOfkeys;
 
 	}
 
+	// ***********************************************************************************************//
 
+	///////////////////// Setup /////////////////////////////
 
+	// ***********************************************************************************************//
 
-	//***********************************************************************************************//
-
-	/////////////////////    Setup for non-partitionning setting	/////////////////////////////
-
-	//***********************************************************************************************//	
-
-
-	public static void setup(ObjectOutputStream output, List<byte[]> listOfkeys, String pwd, int maxLengthOfMask, int falsePosRate) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, InvalidKeySpecException, IOException, InterruptedException, ExecutionException{
-
-		//no partitionning flag	equals false
-
+	public static void setup(ObjectOutputStream output, List<byte[]> listOfkeys, String pwd, int maxLengthOfMask,
+			int falsePosRate) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
+			NoSuchProviderException, NoSuchPaddingException, InvalidKeySpecException, IOException, InterruptedException,
+			ExecutionException {
 
 		TextProc.TextProc(false, pwd);
 
-		System.out.println("\n Beginning of Secure Set Membership construction \n");
+		System.out.println("\n Beginning of ZMF construction \n");
 
-		System.out.println("Number of extracted keywords "+TextExtractPar.lp1.keySet().size());
-		System.out.println("Size of the inverted index (leakage N) "+TextExtractPar.lp1.size());
+		System.out.println("Number of extracted keywords " + TextExtractPar.lp1.keySet().size());
+		System.out.println("Size of the inverted index (leakage N) " + TextExtractPar.lp1.size());
 
-
-		constructBFPar(new ArrayList(TextExtractPar.lp1.keySet()),listOfkeys.get(0), listOfkeys.get(1), maxLengthOfMask,falsePosRate);
-
-		// Encryption of files and update the encrypted identifiers in the second lookup
-		// This commented code below can be used to encrypt files and send them directly to the outsourced server
-
-		/*int counterFile	=	0;	
-		ArrayList<File> listOfFile	=	new ArrayList<File>();
-
-		TextProc.listf(pwd, listOfFile); 
-		Multimap<String, String> encryptedIdToRealId	=	ArrayListMultimap.create();
-
-		System.out.println("\n Beginning of encrypted file outsourcing \n");
-
-
-		for (File file :listOfFile){		
-			CryptoPrimitives.encryptAES_CTR_Socket(output, "EncryptedFiles/", Integer.toString(counterFile), pwd, file.getName(), listOfkeys.get(3), CryptoPrimitives.randomBytes(16));
-			encryptedIdToRealId.put(file.getName(), Integer.toString(counterFile));
-			counterFile++;
-		}*/
-
-		// Replace all documents identifiers with the corresponding encrypted file id
-
-
-
-		// Construction by Cash et al. Crypto 2013 is slower compared to the one by Cash et al. NDSS'14
-		//InvertedIndex.constructEMMPar(listOfkeys.get(1), listOfkeys.get(2), listOfkeys.get(3), TextExtractPar.lp1, encryptedIdToRealId);	
-
+		constructBFPar(new ArrayList(TextExtractPar.lp1.keySet()), listOfkeys.get(0), listOfkeys.get(1),
+				maxLengthOfMask, falsePosRate);
 
 	}
 
+	// ***********************************************************************************************//
 
-	//***********************************************************************************************//
+	///////////////////// GenToken /////////////////////////////
 
-	/////////////////////    GenToken	/////////////////////////////
+	// ***********************************************************************************************/
 
-	//***********************************************************************************************/
+	public static List<Token> genToken(List<byte[]> listOfkeys, List<String> search, int falsePosRate,
+			int maxLengthOfMask) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException,
+			NoSuchPaddingException, IOException {
+		List<Token> token = new ArrayList<Token>();
 
+		for (int i = 0; i < search.size(); i++) {
 
-
-	public static List<Token> genToken(List<byte[]> listOfkeys, List<String> search, int falsePosRate , int maxLengthOfMask) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException{
-		List<Token> token	=	new ArrayList<Token>();
-
-		for (int i=0; i<search.size(); i++){
-
-			List<String> subSearch	=	new ArrayList<String>();
+			List<String> subSearch = new ArrayList<String>();
 			// Create a temporary list that carry keywords in *order*
-			for (int j=i; j<search.size();j++){
+			for (int j = i; j < search.size(); j++) {
 				subSearch.add(search.get(j));
 			}
 
-			token.add(new Token(subSearch, listOfkeys, maxLengthOfMask, falsePosRate));	
+			token.add(new Token(subSearch, listOfkeys, maxLengthOfMask, falsePosRate));
 		}
 		return token;
 
 	}
 
+	// ***********************************************************************************************//
 
-	//***********************************************************************************************//
+	///////////////////// Test Local Phase /////////////////////////////
 
-	/////////////////////    Test Phase	/////////////////////////////
+	// ***********************************************************************************************/
 
-	//***********************************************************************************************/
-
-	public static List<byte[]> test(List<Token> token, List<List<Record>> secureIndex, int bucketSize, int falsePosRate) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException{
-		List<byte[]> result	=	new ArrayList<byte[]>();
-
-
-
-		for (int i=0; i<token.size(); i++ ){
-			List<InvertedIndexResultFormat> resultTMP = InvertedIndex.testSI(token.get(i).getTokenSI1(), token.get(i).getTokenSI2(), secureIndex, bucketSize);
-
-
-
-			for (int j=0; j<resultTMP.size(); j++){
-
-				if (i<token.size()-1){
-
-
-					// Decode first the BF identifier
-					String bFIDPadded	=	new String(resultTMP.get(j).getBloomFilterId());
-
-					String bFID	=	"";
-					boolean fl	=true;
-
-					for (int k=0; k<bFIDPadded.length(); k++){
-						if (bFIDPadded.charAt(k) !='0' || fl==false){
-							bFID	=	bFID + bFIDPadded.charAt(k);
-							fl	=false;
-						}
-					}
-
-					if (bFID.equals("")){
-						bFID	=	bFID	+"0";
-					}
-
-
-					// endOf decoding the BF id
-
-
-					// Reading the BF identifier and de-serialization phase
-
-
-					boolean[] secureSetM = null;
-					try{
-						InputStream file = new FileInputStream("/home/tarik/workspace/GSSE/BF/"+bFID);
-						InputStream buffer = new BufferedInputStream(file);
-						ObjectInput input = new ObjectInputStream (buffer);
-						secureSetM = (boolean[]) input.readObject();
-
-					}
-					catch(ClassNotFoundException ex){
-						ex.printStackTrace();
-					}
-					// End of reading the BF
-
-					// Checking all corresponding tokenSM against the bloom filter
-
-					boolean flag	=	true;
-					List<boolean[]> listOfbloomFilter	=	new ArrayList<boolean[]>();
-					listOfbloomFilter.add(secureSetM);
-					int counter =0;
-					while (flag){
-						if (SecureSetM.testSM(listOfbloomFilter, token.get(i).getTokenSM().get(counter), falsePosRate)[0]	== true){
-							flag = false;
-						}
-						else if (counter == token.get(i).getTokenSM().size()-1){
-							break;
-						}
-						counter++;
-					}
-
-					if (flag == true){
-						result.add(resultTMP.get(j).getEncryptedID());
-					}
-
-				}
-
-				else{
-					result.add(resultTMP.get(j).getEncryptedID());
-				}
-			}
-
-
-		}
-
-
-		return result;
-
-	}
-
-	//***********************************************************************************************//
-
-	/////////////////////    Test Local Phase	/////////////////////////////
-
-	//***********************************************************************************************/
-
-	public static List<String> testLocal(List<Token> token, IEX2Lev disj, int bucketSize, int falsePosRate) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException{
-		List<String> result	=	new ArrayList<String>();
-
-
-
-		for (int i=0; i<token.size(); i++ ){
-			List<String>	resultTMP	=	MMGlobal.testSI(token.get(i).getTokenMMGlobal(), disj.getGlobalMM().getDictionary(), disj.getGlobalMM().getArray());
-
-
-
-
-			List<boolean[]> listOfbloomFilter	=	new ArrayList<boolean[]>();
-
-
-			if (i<token.size()-1){
-				List<String> bFIDPaddeds	=	bloomFilterStart.get(new String(token.get(i).getTokenSI1()));
-
-				for (int j=0; j<resultTMP.size(); j++){
-
-					// Decode first the BF identifier
-
-
-					int bFID = Integer.parseInt(bFIDPaddeds.get(j));
-					// endOf decoding the BF id
-
-					// Checking all corresponding tokenSM against the bloom filter
-
-					listOfbloomFilter.add(bloomFilterMap.get(Integer.toString(bFID)).getSecureSetM());
-
-				}
-
-			}
-
-			for (int j=0; j<resultTMP.size(); j++){
-
-
-				if (i<token.size()-1){
-
-					boolean flag	=	true;
-
-					int counter =0;
-					while (flag){
-
-						if (SecureSetM.testSM(listOfbloomFilter, token.get(i).getTokenSM().get(counter), falsePosRate)[j]	== true){
-							flag = false;
-						}
-						else if (counter == token.get(i).getTokenSM().size()-1){
-							break;
-						}
-						counter++;
-					}
-
-					if (flag == true){
-						result.add(resultTMP.get(j));
-					}
-				}
-
-				else{
-					result.add(resultTMP.get(j));
-				}
-			}
-
-
-		}
-
-
-		return result;
-
-	}
-	//***********************************************************************************************//
-
-	/////////////////////    Decryption of identifiers Client side	/////////////////////////////
-
-	//***********************************************************************************************/
-
-	public static List<String> decryptMatch(List<byte[]> encryptedID, byte[] keyENC) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException{
+	public static List<String> testLocal(List<Token> token, IEX2Lev disj, int bucketSize, int falsePosRate)
+			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
+			NoSuchProviderException, NoSuchPaddingException, IOException {
 		List<String> result = new ArrayList<String>();
 
-		for (int i=0; i<encryptedID.size(); i++){
-			String tmp = new String (CryptoPrimitives.decryptAES_CTR_String(encryptedID.get(i), keyENC)).split("\t\t\t")[0];
+		for (int i = 0; i < token.size(); i++) {
+			List<String> resultTMP = MMGlobal.testSI(token.get(i).getTokenMMGlobal(),
+					disj.getGlobalMM().getDictionary(), disj.getGlobalMM().getArray());
+
+			// System.out.println("Result of MM Global "+resultTMP);
+
+			Map<String, boolean[]> listOfbloomFilter = new HashMap<String, boolean[]>();
+
+			List<Integer> bFIDPaddeds = new ArrayList<Integer>();
+
+			bFIDPaddeds = bloomFilterStart.get(new String(token.get(i).getTokenSI1()));
+
+			if ((i < token.size() - 1) && !(bFIDPaddeds == null)) {
+				// System.out.println("bFIDPaddeds "+bFIDPaddeds);
+
+				for (int j = 0; j < bFIDPaddeds.size(); j++) {
+
+					// Decode first the BF identifier
+
+					int bFID = bFIDPaddeds.get(j);
+					// endOf decoding the BF id
+
+					// Checking all corresponding tokenSM against the bloom
+					// filter
+
+					listOfbloomFilter.put(bloomFilterID.get(bFID),
+							bloomFilterMap.get(Integer.toString(bFID)).getSecureSetM());
+
+				}
+
+			}
+
+			Map<Integer, boolean[]> tempBF = new HashMap<Integer, boolean[]>();
+
+			if (i < token.size() - 1) {
+				for (int v = 0; v < token.get(i).getTokenSM().size(); v++) {
+					tempBF.put(v, ZMF.testSMV2(listOfbloomFilter, token.get(i).getTokenSM().get(v), falsePosRate));
+				}
+			}
+			if (i < token.size() - 1) {
+
+				if (!(bFIDPaddeds == null)) {
+					for (int j = 0; j < bFIDPaddeds.size(); j++) {
+
+						boolean flag = true;
+
+						int counter = 0;
+						while (flag) {
+
+							if (tempBF.get(counter)[j] == true) {
+								flag = false;
+							} else if (counter == token.get(i).getTokenSM().size() - 1) {
+								break;
+							}
+							counter++;
+						}
+
+						// due to filtering replace resultTMP by the following:
+
+						if (flag == true) {
+							result.add(IEXZMF.bloomFilterID.get(bFIDPaddeds.get(j)));
+
+						}
+					}
+
+				}
+
+			} else {
+				result.addAll(resultTMP);
+			}
+
+		}
+
+		return result;
+
+	}
+	// ***********************************************************************************************//
+
+	///////////////////// Decryption of identifiers Client side
+	///////////////////// /////////////////////////////
+
+	// ***********************************************************************************************/
+
+	public static List<String> decryptMatch(List<byte[]> encryptedID, byte[] keyENC)
+			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
+			NoSuchProviderException, NoSuchPaddingException, IOException {
+		List<String> result = new ArrayList<String>();
+
+		for (int i = 0; i < encryptedID.size(); i++) {
+			String tmp = new String(CryptoPrimitives.decryptAES_CTR_String(encryptedID.get(i), keyENC))
+					.split("\t\t\t")[0];
 			result.add(tmp);
 		}
 
 		return result;
 	}
 
-
-
-	public static void constructBFPar(List<String> listOfKeyword, final byte[] keySM, final byte[] keyInvInd, final int maxLengthOfMask, final int falsePosRate)
+	public static void constructBFPar(List<String> listOfKeyword, final byte[] keySM, final byte[] keyInvInd,
+			final int maxLengthOfMask, final int falsePosRate)
 			throws InterruptedException, ExecutionException, IOException {
 
+		long startTime = System.nanoTime();
 
-		long startTime =System.nanoTime();
-
-		int threads =0;
-		if (Runtime.getRuntime().availableProcessors()>listOfKeyword.size()){
+		int threads = 0;
+		if (Runtime.getRuntime().availableProcessors() > listOfKeyword.size()) {
 			threads = listOfKeyword.size();
-		}
-		else{
+		} else {
 			threads = Runtime.getRuntime().availableProcessors();
 		}
 
+		System.out.println("Number of threads " + threads);
 
 		ExecutorService service = Executors.newFixedThreadPool(threads);
-		ArrayList<String[]> inputs=new ArrayList<String[]>(threads);
+		// ArrayList<String[]> inputs=new ArrayList<String[]>(threads);
 
-
-
-		for (int i=0;i<threads;i++){
-			String[] tmp;
-			if (i	==	threads-1){
-				tmp=new String[listOfKeyword.size()/threads	+	listOfKeyword.size() % threads];
-				for (int j=0;j<listOfKeyword.size()/threads	+	listOfKeyword.size() % threads;j++){
-					tmp[j]=listOfKeyword.get((listOfKeyword.size()/threads)	*	i	+	j);
-				}
-			}
-			else{
-				tmp=new String[listOfKeyword.size()/threads];
-				for (int j=0;j<listOfKeyword.size()/threads;j++){
-
-					tmp[j]=listOfKeyword.get((listOfKeyword.size()/threads)	*	i	+	j);
-				}
-			}
-			inputs.add(i, tmp);
+		final Map<Integer, String> concurrentMap = new ConcurrentHashMap<Integer, String>();
+		for (int i = 0; i < listOfKeyword.size(); i++) {
+			concurrentMap.put(i, listOfKeyword.get(i));
 		}
 
+		for (int j = 0; j < threads; j++) {
+			service.execute(new Runnable() {
+				@SuppressWarnings("unused")
+				@Override
+				public void run() {
 
-		List<Future<List<SecureSetMFormat> >> futures = new ArrayList<Future<List<SecureSetMFormat> >>();
-		for (final String[] input : inputs) {
+					while (concurrentMap.keySet().size() > 0) {
+						// write code
+						Set<Integer> possibleValues = concurrentMap.keySet();
 
-			Callable<List<SecureSetMFormat> > callable = new Callable<List<SecureSetMFormat> >() {
-				public List<SecureSetMFormat>  call() throws Exception {
+						Random rand = new Random();
 
-					List<SecureSetMFormat>  output =	secureSetMPar(input,keySM, keyInvInd, maxLengthOfMask, falsePosRate);   
+						int temp = rand.nextInt(possibleValues.size());
 
-					return output;
+						List<Integer> listOfPossibleKeywords = new ArrayList<Integer>(possibleValues);
+
+						// set the input as randomly selected from the remaining
+						// possible keys
+						String[] input = { concurrentMap.get(listOfPossibleKeywords.get(temp)) };
+
+						// remove the key
+						concurrentMap.remove(listOfPossibleKeywords.get(temp));
+
+						try {
+							bloomFilterList
+									.addAll(secureSetMPar(input, keySM, keyInvInd, maxLengthOfMask, falsePosRate));
+						} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchProviderException
+								| NoSuchPaddingException | IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
 				}
-			};
-			futures.add(service.submit(callable));
+			});
 		}
 
+		// Make sure executor stops
 		service.shutdown();
 
+		// Blocks until all tasks have completed execution after a shutdown
+		// request
+		service.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
 
-
-		// We have created the HashMap instead of the list for in memory benchmarking
-		for (Future<List<SecureSetMFormat> > future : futures) {
-			bloomFilterList.addAll(future.get());
-
-		}
-		long endTime   = System.nanoTime();
+		long endTime = System.nanoTime();
 		long totalTime = endTime - startTime;
-		System.out.println("\nTime in (ns) for one BFX in average: "+totalTime/TextExtractPar.lp1.size());
+		System.out.println("\nTime in (ns) for one BFX in average: " + totalTime / TextExtractPar.lp1.size());
+		System.out.println("\nTime to construct local multi-maps in ms " + totalTime / 1000000);
 
 	}
 
+	public static List<SecureSetMFormat> secureSetMPar(String[] input, byte[] keySM, byte[] keyInvInd,
+			int maxLengthOfMask, int falsePosRate) throws InvalidKeyException, NoSuchAlgorithmException,
+			NoSuchProviderException, NoSuchPaddingException, IOException {
+		List<SecureSetMFormat> result = new ArrayList<SecureSetMFormat>();
 
+		for (String keyword : input) {
 
-	public static List<SecureSetMFormat> secureSetMPar(String[] input, byte[] keySM, byte[] keyInvInd, int maxLengthOfMask, int falsePosRate) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException{
-		List<SecureSetMFormat> result	=	new ArrayList<SecureSetMFormat>();
+			// First step of filtering where we reduce all BFs that do not
+			// verify the threshold
 
-		for (String keyword	: input){
+			System.out.println("\n \n Number of keywords processed % "
+					+ (numberOfkeywordsProcessed * 100) / TextExtractPar.lp1.keySet().size() + "\n");
 
+			System.out.println("keyword being processed to issue matryoshka filters: " + keyword);
 
-			System.out.println("keyword being processed to issue matryoshka filters: "+ keyword);
+			Map<String, boolean[]> secureSetM2 = ZMF.setupSetMV2(keySM, keyword, TextExtractPar.lp2, TextExtractPar.lp1,
+					falsePosRate);
+			int counter = 0;
+			for (String id : secureSetM2.keySet()) {
+				result.add(new SecureSetMFormat(secureSetM2.get(id), Integer.toString(numberOfBF)));
 
-			List<boolean[]> secureSetM = SecureSetM.setupSetM(keySM, keyword, TextExtractPar.lp2, TextExtractPar.lp1, maxLengthOfMask, falsePosRate);			
-			for (int i=0; i<secureSetM.size(); i++){
-				result.add(new SecureSetMFormat(secureSetM.get(i), Integer.toString(numberOfBF)));
-				bloomFilterMap.put(Integer.toString(numberOfBF), new SecureSetMFormat(secureSetM.get(i), Integer.toString(numberOfBF)));
-				if (i==0){
-					bloomFilterStart.put(new String(InvertedIndex.genTokSI(keyInvInd, keyword)), new ArrayList<String>());
-					bloomFilterStart.get(new String(InvertedIndex.genTokSI(keyInvInd, keyword))).add(Integer.toString(numberOfBF));
+				bloomFilterMap.put(Integer.toString(numberOfBF),
+						new SecureSetMFormat(secureSetM2.get(id), Integer.toString(numberOfBF)));
+				if (counter == 0) {
+					bloomFilterStart.put(new String(InvertedIndex.genTokSI(keyInvInd, keyword)),
+							new ArrayList<Integer>());
+					bloomFilterStart.get(new String(InvertedIndex.genTokSI(keyInvInd, keyword))).add(numberOfBF);
+				} else {
+					bloomFilterStart.get(new String(InvertedIndex.genTokSI(keyInvInd, keyword))).add(numberOfBF);
 				}
-				else{
-					bloomFilterStart.get(new String(InvertedIndex.genTokSI(keyInvInd, keyword))).add(Integer.toString(numberOfBF));
-				}
 
-				System.out.println("Matryoshka filter number: "+ numberOfBF);
+				bloomFilterID.put(numberOfBF, id);
+
+				System.out.println("Matryoshka filter number: " + numberOfBF);
 				numberOfBF++;
+				counter++;
 
-			}		
+			}
 		}
 
-
+		numberOfkeywordsProcessed++;
 
 		return result;
 	}
-
-
 
 }

@@ -2,18 +2,18 @@
 // SecureSetMFormat Object description
 //***********************************************************************************************//
 
-package org.crypto.sse ;
+package org.crypto.sse;
 
 import java.io.Serializable;
 
-public class SecureSetMFormat implements Serializable{
+public class SecureSetMFormat implements Serializable {
 
 	public boolean[] secureSetM;
 	public String identifier;
 
-	public SecureSetMFormat(boolean[] secureSetM, String identifier){
-		this.identifier=	identifier;
-		this.secureSetM=	secureSetM;
+	public SecureSetMFormat(boolean[] secureSetM, String identifier) {
+		this.identifier = identifier;
+		this.secureSetM = secureSetM;
 	}
 
 	public boolean[] getSecureSetM() {
@@ -31,7 +31,5 @@ public class SecureSetMFormat implements Serializable{
 	public void setIdentifier(String identifier) {
 		this.identifier = identifier;
 	}
-
-
 
 }
