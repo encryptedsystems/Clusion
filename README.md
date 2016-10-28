@@ -82,13 +82,26 @@ For a quick test, create folder and store some input files, needed jars and test
 	run `export CLASSPATH=$CLASSPATH:/home/xxx/Clusion/target:/home/xxx/Clusion/target/test-classes`
 	
 	Ensure the directory paths are correct in the above
+	
 + to test 2Lev 
 
 	run `java org.crypto.sse.TestLocal2Lev`
 	
++ to test 2Lev (response-hiding)
+
+	run `java org.crypto.sse.TestLocalRH2Lev`	
+
++ to test ZMF 
+
+	run `java org.crypto.sse.TestLocalZMF`	
+	
 + to test IEX-2Lev 
 
 	run `java org.crypto.sse.TestLocalIEX2Lev`
+	
++ to test IEX-2Lev (response-hiding)
+
+	run `java org.crypto.sse.TestLocalIEXRH2Lev`
 	
 + to test IEX-ZMF 
 
@@ -105,7 +118,10 @@ Clusion currently does not have any documentation. The best way to learn how to
 use the library is to read through the source of the test code:
 
 + `org.crypto.sse.TestLocal2Lev.java`
++ `org.crypto.sse.TestLocalRH2Lev.java`
++ `org.crypto.sse.TestLocalZMF.java`
 + `org.crypto.sse.TestLocalIEX2Lev.java`
++ `org.crypto.sse.TestLocalIEXRH2Lev.java`
 + `org.crypto.sse.TestLocalIEXZMF.java`
 
 ## Requirements
