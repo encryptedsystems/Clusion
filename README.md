@@ -7,7 +7,7 @@ single, disjunctive, conjunctive and (arbitrary) boolean keyword search.  All
 the implemented schemes have *optimal* asymptotic search complexity in the
 worst-case.  
 
-Clusion is provided as-is under the *Modified BSD License* (BSD-3). 
+Clusion is provided as-is under the *GNU General Public License v3 (GPLv3)*. 
 
 
 ## Implementation
@@ -34,7 +34,7 @@ The following SSE schemes are implemented:
 
 + **2Lev**:  a static and I/O-efficient SSE scheme \[[CJJJKRS14][CJJJKRS14]]\. 
 
-+ **IEX^B-2Lev**: a  worst-case optimal boolean SSE scheme \[KM16\].
++ **BIEX-2Lev**: a  worst-case optimal boolean SSE scheme \[KM16\].
   This implementation makes use of 2Lev as a building block.  The
 disjunctive-only IEX-2Lev construction from \[KM16\] is a special case
 of IEX^B-2Lev where the number of disjunctions is set to 1 in the Token
@@ -48,7 +48,7 @@ also makes a non-standard use of online ciphers.  Here, we implemented the
 HCBC1 construction from  \[[BBKN07][BBKN07]\] but would like to replace this
 with the more efficient COPE scheme from \[[ABLMTY13][ABLMTY13]\]. 
 
-+ **IEX^B-ZMF**: a compact worst-case optimal boolean SSE scheme. Like our
++ **BIEX-ZMF**: a compact worst-case optimal boolean SSE scheme. Like our
   IEX^B-2Lev implementation, the purely disjunctive variant IEX-ZMF is a special case with the number of disjunctions set to 1. 
 
 + **IEX-2Lev-Amazon**: a distributed implementation of text indexing based on MapReduce/Hadoop
