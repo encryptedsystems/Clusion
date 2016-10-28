@@ -8,14 +8,24 @@
 package org.crypto.sse;
 
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
 import java.io.BufferedReader;
-import java.io.File;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import javax.crypto.NoSuchPaddingException;
 
 public class TestLocalIEXZMF {
 	private static final int falsePosRate	=	25;
@@ -30,7 +40,7 @@ public class TestLocalIEXZMF {
 
 		String pass	=	keyRead.readLine();		
 
-		List<byte[]> listSK	=	IEXZMF.keyGen(256, pass, "salt/salt", 100);
+		List<byte[]> listSK	=	IEXZMF.keyGen(128, pass, "salt/salt", 100);
 
 		long startTime =System.nanoTime();
 
@@ -39,6 +49,7 @@ public class TestLocalIEXZMF {
 		String pathName	=	keyRead.readLine();
 
 
+		
 		TextProc.TextProc(false, pathName);
 
 
@@ -46,138 +57,199 @@ public class TestLocalIEXZMF {
 		System.out.println("Number of keywords pairs (w. id): "+ TextExtractPar.lp1.size());
 		System.out.println("Number of keywords "+ TextExtractPar.lp1.keySet().size());
 
-		IEXZMF.constructBFPar(new ArrayList(TextExtractPar.lp1.keySet()),listSK.get(0), listSK.get(1), maxLengthOfMask, falsePosRate);
-
-		// Encryption of files and update the encrypted identifiers in the second lookup
-
-		int counterFile	=	0;	
-		ArrayList<File> listOfFile	=	new ArrayList<File>();
-
-		TextProc.listf("Input", listOfFile); 
-		Multimap<String, String> encryptedIdToRealId	=	ArrayListMultimap.create();
-
-		for (File file :listOfFile){		
-			encryptedIdToRealId.put(file.getName(), Integer.toString(counterFile));
-			counterFile++;
-		}
-
-		// Replace all documents identifiers with a random ID
-
+		
 		System.out.println("\n Beginning of global encrypted multi-map construction \n");
 
 		int bigBlock	=	1000;
 		int smallBlock	=	100;
-		int dataSize	=	10000;
+		int dataSize	=	0;
 
 		MMGlobal[]	localMultiMap	=	null;
 		Multimap<String, Integer>	dictionaryForMM	=	null;
 		//Construction by Cash et al NDSS 2014
 
-		IEX2Lev disj	=	new IEX2Lev(MMGlobal.constructEMMPar(listSK.get(1), TextExtractPar.lp1, bigBlock, smallBlock, dataSize), localMultiMap, dictionaryForMM);
+		for (String keyword	:	TextExtractPar.lp1.keySet()){
 
-		// The line below creates a Global multi-map based on the TSet by Cash et al. Crypto'13. It is commented as we have implemented a faster instantiation of encrypted multi-map based 
-		// on the construction by Cash et al. NDSS'14
 
-		//InvertedIndex.constructEMMPar(listSK.get(1), listSK.get(2), listSK.get(3), TextExtractPar.lp1, encryptedIdToRealId);	
+			if (dataSize < TextExtractPar.lp1.get(keyword).size()){
+				dataSize = TextExtractPar.lp1.get(keyword).size();
+			}
+
+		}
+
+		IEX2Lev disj	=	new IEX2Lev(MMGlobal.constructEMMParGMM(listSK.get(1), TextExtractPar.lp1, bigBlock, smallBlock, dataSize), localMultiMap, dictionaryForMM);
+
+		
+		System.out.println("\n Beginning of local encrypted multi-map construction \n");
+
+		
+		IEXZMF.constructBFPar(new ArrayList(TextExtractPar.lp1.keySet()),listSK.get(0), listSK.get(1), maxLengthOfMask, falsePosRate);
 
 		long endTime2   = System.nanoTime();
+
+
 		long totalTime2 = endTime2 - startTime2;
 
 		System.out.println("\n*****************************************************************");
 		System.out.println("\n\t\tSTATS");
 		System.out.println("\n*****************************************************************");
 
-		System.out.println("\nTotal Time elapsed for the entire construction in seconds: "+totalTime2/1000000000);
+		System.out.println("\nTotal Time elapsed for the local multi-map construction in seconds: "+totalTime2/1000000);
 
-		// The two commented commands are used to compute the size of the encrypted Local multi-maps and global multi-maps
+		
+		// Beginning of search phase
 
-		//System.out.println("\nSize of the Structure EMM: "+ SizeOf.humanReadable(SizeOf.deepSizeOf(IEXZMF.bloomFilterList)));
-		//System.out.println("\nSize of the Structure MMg: "+ SizeOf.humanReadable(SizeOf.deepSizeOf(disj.getGlobalMM())));
 		while(true){
-
-			// Boolean queries
-
+			
 			System.out.println("How many disjunctions? ");
 			int numDisjunctions = Integer.parseInt(keyRead.readLine());
 
 			// Storing the CNF form 
 			String[][] bool = new String[numDisjunctions][];
 			for (int i=0; i<numDisjunctions; i++){
-				System.out.println("Enter the keywords of the disjunctions ");
+				System.out.println("Enter the keywords of the "+i+"th disjunctions ");
 				bool[i]	=	keyRead.readLine().split(" ");
 			}
+	
 
-			// Generate the IEX token
-			List<String> searchBol	=	new ArrayList<String>();
-			for (int i=0; i<bool[0].length; i++){
-				searchBol.add(bool[0][i]);
-			}
-
-
-			long startTime3 =System.nanoTime();
-
-			List<Token> tokenBol	=	IEXZMF.genToken(listSK, searchBol, falsePosRate, maxLengthOfMask);
-			List<String> tmpBol = IEXZMF.testLocal(tokenBol, disj, InvertedIndex.bucketSize, falsePosRate);
-			System.out.println(tmpBol);
-
-			for (int i=1; i<numDisjunctions; i++ ){
-				for (int k=0; k<bool[0].length;k++){
-					List<String> searchTMP	=	new ArrayList<String>();
-					List<String> tmpList	=	new ArrayList<String>();
-					searchTMP.add(bool[0][k]);
-					for (int r=0; r< bool[i].length; r++){
-						searchTMP.add(bool[i][r]);
-					}
-
-					List<Token> tokenTMP	=	IEXZMF.genToken(listSK, searchTMP, falsePosRate, maxLengthOfMask);
-
-					// Here we perform an intersection (contrary to its argument)
-
-					List<String>	resultTMP	=	MMGlobal.testSI(tokenTMP.get(0).getTokenMMGlobal(), disj.getGlobalMM().getDictionary(), disj.getGlobalMM().getArray());
-
-					List<boolean[]> listOfbloomFilter	=	new ArrayList<boolean[]>();
-
-
-					List<String> bFIDPaddeds	=	IEXZMF.bloomFilterStart.get(new String(tokenTMP.get(0).getTokenSI1()));
-
-					for (int j=0; j<resultTMP.size(); j++){
-						int bFID = Integer.parseInt(bFIDPaddeds.get(j));
-						listOfbloomFilter.add(IEXZMF.bloomFilterMap.get(Integer.toString(bFID)).getSecureSetM());		
-					}
-
-					for (int j=0; j<resultTMP.size(); j++){
-
-						boolean flag	=	true;
-
-						int counter =0;
-						while (flag){
-
-							if (SecureSetM.testSM(listOfbloomFilter, tokenTMP.get(0).getTokenSM().get(counter), falsePosRate)[j]	== true){
-								flag = false;
-							}
-							else if (counter == tokenTMP.get(0).getTokenSM().size()-1){
-								break;
-							}
-							counter++;
-						}
-
-						if (flag == false){
-							tmpList.add(resultTMP.get(j));
-
-						}
-
-					}
-
-					tmpBol.retainAll(tmpList);
-				}
-				System.out.println("Result "+tmpBol);
-			}
-
-			long endTime3   = System.nanoTime();
-			long totalTime3 = endTime3 - startTime3;
-
-			System.out.println("\nTime elapsed for the query in ns: "+totalTime3);
-		}
+			test("logZMF.txt","Test",1,disj,listSK,bool);
+		}		
 
 	}
+	
+	
+	
+	public static void test(String output, String word, int numberIterations, IEX2Lev disj, List<byte[]> listSK, String[][] bool) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, UnsupportedEncodingException, IOException{
+		
+		
+		long minimum = (long) Math.pow(10, 10);
+		long maximum =0;
+		long average= 0;
+
+				
+		// Generate the IEX token
+		List<String> searchBol	=	new ArrayList<String>();
+		for (int i=0; i<bool[0].length; i++){
+			searchBol.add(bool[0][i]);
+		}
+			
+			for (int g=0; g<numberIterations;g++){
+
+
+
+
+				long startTime3 =System.nanoTime();
+
+				List<Token> tokenBol	=	IEXZMF.genToken(listSK, searchBol, falsePosRate, maxLengthOfMask);
+				List<String> tmpBol = IEXZMF.testLocal(tokenBol, disj, InvertedIndex.bucketSize, falsePosRate);
+
+				for (int i=1; i<bool.length; i++ ){
+					List<String> tmpBol2 = new ArrayList<String>();
+
+					for (int k=0; k<bool[0].length;k++){
+						List<String> searchTMP	=	new ArrayList<String>();
+						List<String> tmpList	=	new ArrayList<String>();
+						searchTMP.add(bool[0][k]);
+						for (int r=0; r< bool[i].length; r++){
+							searchTMP.add(bool[i][r]);
+						}
+
+						List<Token> tokenTMP	=	IEXZMF.genToken(listSK, searchTMP, falsePosRate, maxLengthOfMask);
+
+						// Here we perform an intersection (contrary to its argument)
+
+						List<String>	resultTMP	=	MMGlobal.testSI(tokenTMP.get(0).getTokenMMGlobal(), disj.getGlobalMM().getDictionary(), disj.getGlobalMM().getArray());
+
+						Map<String,boolean[]> listOfbloomFilter	=	new HashMap<String,boolean[]>();
+
+
+						List<Integer> bFIDPaddeds	=	IEXZMF.bloomFilterStart.get(new String(tokenTMP.get(0).getTokenSI1()));
+
+						 
+						if (!(bFIDPaddeds == null)){	
+						for (int j=0; j<bFIDPaddeds.size(); j++){
+							int bFID = bFIDPaddeds.get(j);
+							listOfbloomFilter.put(IEXZMF.bloomFilterID.get(bFID),IEXZMF.bloomFilterMap.get(Integer.toString(bFID)).getSecureSetM());		
+						}
+						}
+
+						
+						Map<Integer,boolean[]> tempBF = new HashMap<Integer,boolean[]>();
+						
+						for (int v = 0; v<tokenTMP.get(0).getTokenSM().size();v++){
+							tempBF.put(v, ZMF.testSMV2(listOfbloomFilter, tokenTMP.get(0).getTokenSM().get(v), falsePosRate));
+						}
+						
+						if (!(bFIDPaddeds == null)){	
+						for (int j=0; j<bFIDPaddeds.size(); j++){
+
+							boolean flag	=	true;
+
+							int counter =0;
+							while (flag){
+
+								if (tempBF.get(counter)[j]	== true){
+									flag = false;
+								}
+								else if (counter == tokenTMP.get(0).getTokenSM().size()-1){
+									break;
+								}
+								counter++;
+							}
+
+							
+							if (flag == false){
+								tmpList.add(IEXZMF.bloomFilterID.get(bFIDPaddeds.get(j)));
+
+							}
+
+
+						}
+						}
+						
+
+						
+						tmpBol2.addAll(tmpList);
+						
+						System.out.println("Second "+tmpBol2);
+
+
+					}
+					
+					tmpBol.retainAll(tmpBol2);
+
+				}
+				
+				System.out.println("Result "+tmpBol);
+
+
+				long endTime3   = System.nanoTime();
+				long totalTime3 = endTime3 - startTime3;
+				
+				if (totalTime3 < minimum ){
+					
+					minimum = totalTime3;
+					
+				}
+				
+				if (totalTime3 > maximum ){
+					
+					maximum = totalTime3;
+					
+				}
+				
+				average = average + totalTime3;
+			
+		}
+			
+			BufferedWriter writer2 = new BufferedWriter(new FileWriter(output, true));
+			writer2.write("\n Word "+ word+" minimum "+ minimum);
+			writer2.write("\n Word "+ word+" maximum "+ maximum);		
+			writer2.write("\n Word "+ word+" average "+ average/numberIterations+"\n\n");
+			writer2.close();			
+		
+		
+	}
+	
+	
 }
