@@ -151,7 +151,7 @@ Clusion was tested with Java version `1.7.0_75`.
 
 1. \[[CJJJKRS14](https://eprint.iacr.org/2014/853.pdf)\]:  *Dynamic Searchable Encryption in Very-Large Databases: Data Structures and Implementation* by D. Cash, J. Jaeger, S. Jarecki, C. Jutla, H. Krawczyk, M. Rosu, M. Steiner.
 
-2. \[KM16\]:  *Boolean Searchable Symmetric Encryption with Worst-Case Optimal Complexity* by S. Kamara and T. Moataz. Available upon request. 
+2. \[KM16\]:  *Boolean Searchable Symmetric Encryption with -Case Sub-Linear Complexity* by S. Kamara and T. Moataz. Available upon request. 
 
 3. \[[Goh03](https://eprint.iacr.org/2003/216.pdf)\]: *Secure Indexes* by E. Goh. 
 
