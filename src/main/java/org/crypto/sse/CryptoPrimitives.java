@@ -140,47 +140,7 @@ public class CryptoPrimitives {
 	}
 
 	
-	// ***********************************************************************************************//
 
-	///////////////////// Message authentication+Encryption (Authenticated encryption)
-	///////////////////// /////////////////////////////
-
-	// ***********************************************************************************************//	
-	
-	public static byte[][] auth_encrypt_AES_HMAC(byte[] keyEnc, byte[] keyHMAC, byte[] ivBytes, String identifier, int maxSize) throws InvalidKeyException, 						InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException{
-		
-		byte[][] output = new byte[2][];
-		output[0]= generateHmac(keyHMAC,identifier);
-
-		output[1]= encryptAES_CTR_String(keyEnc, ivBytes, identifier, maxSize);		
-
-		return output;
-	}
-	
-	// ***********************************************************************************************//
-
-	///////////////////// Message authentication+Decryption (Authenticated encryption)
-	///////////////////// /////////////////////////////
-
-	// ***********************************************************************************************//	
-	
-	public static byte[][] auth_decrypt_AES_HMAC(byte[] keyEnc, byte[] keyHMAC, byte[][] input) throws InvalidKeyException, InvalidAlgorithmParameterException, 						NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException{
-		
-		byte[][] output = new byte[2][1];
-		output[0][0] = '0';
-		output[1]= decryptAES_CTR_String(input[1], keyEnc);
-
-		// splitting required for correctness, we can get rid of the delimiter in encryptAES_CTR_String
-		// if we use the same string length
-		
-		byte[] hmacResult = generateHmac(keyHMAC,new String(output[1]).split("\t\t\t")[0]);
-
-		if (Arrays.equals(hmacResult,input[0])){
-			output[0][0] = '1';
-		}
-
-		return output;
-	}
 
 	// ***********************************************************************************************//
 
@@ -198,6 +158,52 @@ public class CryptoPrimitives {
 		random.setSeed(thread.generateSeed(20, true));
 		random.nextBytes(salt);
 		return salt;
+	}
+
+
+
+
+
+	// ***********************************************************************************************//
+
+	///////////////////// Message authentication+Encryption (Authenticated encryption)
+	///////////////////// /////////////////////////////
+
+	// ***********************************************************************************************//	
+	
+	public static byte[][] auth_encrypt_AES_HMAC(byte[] keyEnc, byte[] keyHMAC, byte[] ivBytes, String identifier, int maxSize) throws InvalidKeyException,  					InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException{
+		
+		byte[][] output = new byte[2][];
+
+		output[1]= encryptAES_CTR_String(keyEnc, ivBytes, identifier, maxSize);	
+		output[0]= generateHmac(keyHMAC,output[1]);
+
+
+		return output;
+	}
+	
+	// ***********************************************************************************************//
+
+	///////////////////// Message authentication+Decryption (Authenticated encryption)
+	///////////////////// /////////////////////////////
+
+	// ***********************************************************************************************//	
+	
+	public static byte[][] auth_decrypt_AES_HMAC(byte[] keyEnc, byte[] keyHMAC, byte[][] input) throws InvalidKeyException, InvalidAlgorithmParameterException, 					NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException{
+		
+		byte[][] output = new byte[2][1];
+		output[0][0] = '0';
+		output[1]= decryptAES_CTR_String(input[1], keyEnc);
+		// splitting required for correctness, we can get rid of the delimiter in encryptAES_CTR_String
+		// if we use the same string length
+		
+		byte[] hmacResult = generateHmac(keyHMAC,input[1]);
+
+		if (Arrays.equals(hmacResult,input[0])){
+			output[0][0] = '1';
+		}
+
+		return output;
 	}
 
 	// ***********************************************************************************************//
