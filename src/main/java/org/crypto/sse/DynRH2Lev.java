@@ -1,0 +1,211 @@
+package org.crypto.sse;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
+import javax.crypto.NoSuchPaddingException;
+
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Ordering;
+import com.google.common.collect.TreeMultimap;
+
+public class DynRH2Lev extends RH2Lev {
+
+	public HashMap<String, byte[]> dictionaryUpdates = new HashMap<String, byte[]>();
+	public static HashMap<String, Integer> state = new HashMap<String, Integer>();
+
+	public DynRH2Lev(Multimap<String, byte[]> dictionary, byte[][] arr, HashMap<String, byte[]> dictionaryUpdates) {
+		super(dictionary, arr);
+		// TODO Auto-generated constructor stub
+		this.dictionaryUpdates = dictionaryUpdates;
+
+	}
+
+	public HashMap<String, byte[]> getDictionaryUpdates() {
+		return dictionaryUpdates;
+	}
+
+	// ***********************************************************************************************//
+
+	///////////////////// SetupSI /////////////////////////////
+
+	// ***********************************************************************************************//
+
+	public static DynRH2Lev constructEMMParGMM(final byte[] key, final Multimap<String, String> lookup,
+			final int bigBlock, final int smallBlock, final int dataSize)
+			throws InterruptedException, ExecutionException, IOException {
+
+		RH2Lev result = constructEMMPar(key, lookup, bigBlock, smallBlock, dataSize);
+
+		System.out.println("Initialization of the Update Encrypted Dictionary\n");
+
+		HashMap<String, byte[]> dictionaryUpdates = new HashMap<String, byte[]>();
+
+		return new DynRH2Lev(result.getDictionary(), result.getArray(), dictionaryUpdates);
+
+	}
+
+	public static TreeMultimap<String, byte[]> tokenUpdate(byte[] key, Multimap<String, String> lookup)
+			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
+			NoSuchProviderException, NoSuchPaddingException, IOException {
+
+		// We use a lexicographic sorted list such that the server
+		// will not know any information of the inserted elements creation order
+		TreeMultimap<String, byte[]> tokenUp = TreeMultimap.create(Ordering.natural(), Ordering.usingToString());
+
+		// Key generation
+		for (String word : lookup.keySet()) {
+
+			byte[] key2 = CryptoPrimitives.generateCmac(key, 2 + word);
+			// generate keys for response-hiding construction for SIV (Synthetic
+			// IV)
+			byte[] key3 = CryptoPrimitives.generateCmac(master, 3 + new String());
+
+			byte[] key4 = null;
+			if (lmm == false) {
+				key4 = CryptoPrimitives.generateCmac(master, 4 + word);
+			} else {
+				key4 = CryptoPrimitives.generateCmac(master, eval);
+			}
+
+			byte[] key5 = CryptoPrimitives.generateCmac(key, 5 + word);
+
+			for (String id : lookup.get(word)) {
+				int counter = 0;
+
+				if (state.get(word) != null) {
+					counter = state.get(word);
+				}
+
+				state.put(word, counter + 1);
+
+				byte[] l = CryptoPrimitives.generateCmac(key5, "" + counter);
+
+				String value = new String(CryptoPrimitives.DTE_encryptAES_CTR_String(key3, key4, id, 20), "ISO-8859-1");
+
+				tokenUp.put(new String(l), CryptoPrimitives.encryptAES_CTR_String(key2,
+						CryptoPrimitives.randomBytes(16), value, sizeOfFileIdentifer));
+
+			}
+
+		}
+
+		return tokenUp;
+
+	}
+
+	// ***********************************************************************************************//
+
+	///////////////////// Update /////////////////////////////
+
+	// ***********************************************************************************************//
+
+	public static void update(HashMap<String, byte[]> dictionary, TreeMultimap<String, byte[]> tokenUp) {
+
+		for (String label : tokenUp.keySet()) {
+			dictionary.put(label, tokenUp.get(label).first());
+		}
+	}
+
+	// ***********************************************************************************************//
+
+	///////////////////// Token generation
+	///////////////////// /////////////////////////////
+
+	// ***********************************************************************************************//
+
+	public static byte[][] genToken(byte[] key, String word) throws UnsupportedEncodingException {
+
+		byte[][] keys = new byte[4][];
+		keys[0] = CryptoPrimitives.generateCmac(key, 1 + word);
+		keys[1] = CryptoPrimitives.generateCmac(key, 2 + word);
+		keys[2] = CryptoPrimitives.generateCmac(key, 5 + word);
+		if (state.get(word) != null) {
+			keys[3] = ByteBuffer.allocate(4).putInt(state.get(word)).array();
+		} else {
+			keys[3] = ByteBuffer.allocate(4).putInt(0).array();
+		}
+
+		return keys;
+	}
+
+	// ***********************************************************************************************//
+
+	///////////////////// TestSI /////////////////////////////
+
+	// ***********************************************************************************************//
+
+	public static List<String> testSI(byte[][] keys, Multimap<String, byte[]> dictionary, byte[][] array,
+			HashMap<String, byte[]> dictionaryUpdates) throws InvalidKeyException, InvalidAlgorithmParameterException,
+			NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException {
+
+		List<String> result = testSI(keys, dictionary, array);
+
+		for (int i = 0; i < ByteBuffer.wrap(keys[3]).getInt(); i++) {
+			byte[] temp = dictionaryUpdates.get(new String(CryptoPrimitives.generateCmac(keys[2], "" + i)));
+			String decr = new String(CryptoPrimitives.decryptAES_CTR_String(temp, keys[1])).split("\t\t\t")[0];
+
+			result.add(decr);
+		}
+		return result;
+	}
+
+	// ***********************************************************************************************//
+
+	///////////////////// Forward Secure versions /////////////////////////////
+
+	// ***********************************************************************************************//
+
+	///////////////////// Forward Secure Token generation
+	///////////////////// /////////////////////////////
+
+	// ***********************************************************************************************//
+
+	public static byte[][] genTokenFS(byte[] key, String word) throws UnsupportedEncodingException {
+		int counter = 0;
+		if (state.get(word) != null) {
+			counter = state.get(word);
+		}
+
+		byte[][] keys = new byte[2 + counter][];
+		keys[0] = CryptoPrimitives.generateCmac(key, 1 + word);
+		keys[1] = CryptoPrimitives.generateCmac(key, 2 + word);
+		byte[] temp = CryptoPrimitives.generateCmac(key, 5 + word);
+
+		for (int i = 0; i < counter; i++) {
+			keys[2 + i] = CryptoPrimitives.generateCmac(temp, "" + i);
+		}
+
+		return keys;
+	}
+
+	// ***********************************************************************************************//
+
+	///////////////////// Forward Secure TestSI /////////////////////////////
+
+	// ***********************************************************************************************//
+
+	public static List<String> testSIFS(byte[][] keys, Multimap<String, byte[]> dictionary, byte[][] array,
+			HashMap<String, byte[]> dictionaryUpdates) throws InvalidKeyException, InvalidAlgorithmParameterException,
+			NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException {
+
+		List<String> result = testSI(keys, dictionary, array);
+
+		for (int i = 0; i < keys.length - 2; i++) {
+			byte[] temp = dictionaryUpdates.get(new String(keys[2 + i]));
+			String decr = new String(CryptoPrimitives.decryptAES_CTR_String(temp, keys[1])).split("\t\t\t")[0];
+
+			result.add(decr);
+		}
+		return result;
+	}
+
+}
