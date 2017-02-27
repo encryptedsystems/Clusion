@@ -14,7 +14,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 //***********************************************************************************************//
 
 // This file contains the step-by-step local benchmarking of the IEX-2Lev. The encrypted data structure remains in the RAM.
@@ -71,7 +70,7 @@ public class TestLocalIEX2Lev {
 
 		long startTime2 = System.nanoTime();
 
-		IEX2Lev disj = IEX2Lev.setupDISJ(listSK, TextExtractPar.lp1, TextExtractPar.lp2, bigBlock, smallBlock, 0);
+		IEX2Lev disj = IEX2Lev.setup(listSK, TextExtractPar.lp1, TextExtractPar.lp2, bigBlock, smallBlock, 0);
 
 		long endTime2 = System.nanoTime();
 		long totalTime2 = endTime2 - startTime2;
@@ -146,7 +145,7 @@ public class TestLocalIEX2Lev {
 
 			// System.out.println(searchBol);
 
-			Set<String> tmpBol = IEX2Lev.testDIS(IEX2Lev.genToken(listSK, searchBol), disj);
+			Set<String> tmpBol = IEX2Lev.query(IEX2Lev.token(listSK, searchBol), disj);
 
 			// System.out.println(tmpBol);
 
@@ -159,9 +158,9 @@ public class TestLocalIEX2Lev {
 						searchTMP.add(bool[i][r]);
 					}
 
-					List<TokenDIS> tokenTMP = IEX2Lev.genToken(listSK, searchTMP);
+					List<TokenDIS> tokenTMP = IEX2Lev.token(listSK, searchTMP);
 
-					Set<String> result = new HashSet<String>(MMGlobal.testSI(tokenTMP.get(0).getTokenMMGlobal(),
+					Set<String> result = new HashSet<String>(RR2Lev.query(tokenTMP.get(0).getTokenMMGlobal(),
 							disj.getGlobalMM().getDictionary(), disj.getGlobalMM().getArray()));
 
 					if (!(tmpBol.size() == 0)) {
@@ -174,13 +173,13 @@ public class TestLocalIEX2Lev {
 							for (int j = 0; j < tokenTMP.get(0).getTokenMMLocal().size(); j++) {
 
 								Set<String> temporary = new HashSet<String>();
-								List<String> tempoList = MMGlobal.testSI(tokenTMP.get(0).getTokenMMLocal().get(j),
+								List<String> tempoList = RR2Lev.query(tokenTMP.get(0).getTokenMMLocal().get(j),
 										disj.getLocalMultiMap()[pos].getDictionary(),
 										disj.getLocalMultiMap()[pos].getArray());
 
 								if (!(tempoList == null)) {
 									temporary = new HashSet<String>(
-											MMGlobal.testSI(tokenTMP.get(0).getTokenMMLocal().get(j),
+											RR2Lev.query(tokenTMP.get(0).getTokenMMLocal().get(j),
 													disj.getLocalMultiMap()[pos].getDictionary(),
 													disj.getLocalMultiMap()[pos].getArray()));
 								}
@@ -229,6 +228,10 @@ public class TestLocalIEX2Lev {
 	}
 
 }
+
+/*
+ * Code Below used for Benchmarking
+ */
 
 // public static ArrayList<String> list = new ArrayList<String>() {{
 // add("iex15");

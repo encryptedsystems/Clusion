@@ -14,7 +14,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 //***********************************************************************************************//
 
 // This file contains most cryptographic primitives : AES in CTR mode for file and string encryption, 
@@ -40,6 +39,7 @@ import java.io.*;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.util.Arrays;
 
 public class CryptoPrimitives {
 
@@ -49,16 +49,16 @@ public class CryptoPrimitives {
 	// ***********************************************************************************************//
 
 	///////////////////// KeyGen return a raw key based on PBE
-	///////////////////// PKCS12/////////////////////////////
-	///////////////////// mostly taken from
+	///////////////////// PKCS12 mostly taken from
 	///////////////////// org.bouncycastle.jce.provider.test.PBETest
-	// check also doc in
+	///////////////////// check also doc in
 	///////////////////// http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#SecretKeyFactory/////////////////////////////
 	// ***********************************************************************************************//
 
 	public static byte[] keyGenSetM(String pass, byte[] salt, int icount, int keySize)
 			throws InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException {
 
+		// With Java 8, use "PBKDF2WithHmacSHA256/512" instead
 		SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
 		KeySpec spec = new PBEKeySpec(pass.toCharArray(), salt, icount, keySize);
 		SecretKey tmp = factory.generateSecret(spec);
@@ -139,16 +139,11 @@ public class CryptoPrimitives {
 		return result;
 	}
 
-	
-
-
 	// ***********************************************************************************************//
 
 	///////////////////// Salt generation/RandomBytes: it is generated just once
 	///////////////////// and it is not necessary to keep it secret
-	///////////////////// /////////////////////////////
-
-	// can also be used for random bit generation
+	///////////////////// can also be used for random bit generation
 	// ***********************************************************************************************//
 
 	public static byte[] randomBytes(int sizeOfSalt) {
@@ -160,46 +155,48 @@ public class CryptoPrimitives {
 		return salt;
 	}
 
+	// ***********************************************************************************************//
 
-
-
+	///////////////////// Message authentication+Encryption (Authenticated
+	///////////////////// encryption)
+	///////////////////// /////////////////////////////
 
 	// ***********************************************************************************************//
 
-	///////////////////// Message authentication+Encryption (Authenticated encryption)
-	///////////////////// /////////////////////////////
+	public static byte[][] auth_encrypt_AES_HMAC(byte[] keyEnc, byte[] keyHMAC, byte[] ivBytes, String identifier,
+			int maxSize) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
+			NoSuchProviderException, NoSuchPaddingException, IOException {
 
-	// ***********************************************************************************************//	
-	
-	public static byte[][] auth_encrypt_AES_HMAC(byte[] keyEnc, byte[] keyHMAC, byte[] ivBytes, String identifier, int maxSize) throws InvalidKeyException,  					InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException{
-		
 		byte[][] output = new byte[2][];
 
-		output[1]= encryptAES_CTR_String(keyEnc, ivBytes, identifier, maxSize);	
-		output[0]= generateHmac(keyHMAC,output[1]);
-
+		output[1] = encryptAES_CTR_String(keyEnc, ivBytes, identifier, maxSize);
+		output[0] = generateHmac(keyHMAC, output[1]);
 
 		return output;
 	}
-	
+
 	// ***********************************************************************************************//
 
-	///////////////////// Message authentication+Decryption (Authenticated encryption)
+	///////////////////// Message authentication+Decryption (Authenticated
+	///////////////////// encryption)
 	///////////////////// /////////////////////////////
 
-	// ***********************************************************************************************//	
-	
-	public static byte[][] auth_decrypt_AES_HMAC(byte[] keyEnc, byte[] keyHMAC, byte[][] input) throws InvalidKeyException, InvalidAlgorithmParameterException, 					NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException{
-		
+	// ***********************************************************************************************//
+
+	public static byte[][] auth_decrypt_AES_HMAC(byte[] keyEnc, byte[] keyHMAC, byte[][] input)
+			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
+			NoSuchProviderException, NoSuchPaddingException, IOException {
+
 		byte[][] output = new byte[2][1];
 		output[0][0] = '0';
-		output[1]= decryptAES_CTR_String(input[1], keyEnc);
-		// splitting required for correctness, we can get rid of the delimiter in encryptAES_CTR_String
+		output[1] = decryptAES_CTR_String(input[1], keyEnc);
+		// splitting required for correctness, we can get rid of the delimiter
+		// in encryptAES_CTR_String
 		// if we use the same string length
-		
-		byte[] hmacResult = generateHmac(keyHMAC,input[1]);
 
-		if (Arrays.equals(hmacResult,input[0])){
+		byte[] hmacResult = generateHmac(keyHMAC, input[1]);
+
+		if (Arrays.equals(hmacResult, input[0])) {
 			output[0][0] = '1';
 		}
 
@@ -224,7 +221,6 @@ public class CryptoPrimitives {
 		identifier = identifier + "\t\t\t";
 		byte[] input = concat(identifier.getBytes(), new byte[sizeOfFileName - identifier.getBytes().length]);
 
-		// byte[] input = concat(input1 , input0);
 		IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
 		SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
 		Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding", "BC");
@@ -254,7 +250,6 @@ public class CryptoPrimitives {
 			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
 			NoSuchProviderException, NoSuchPaddingException, IOException {
 		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-		// byte[] input = readAlternateImpl(folder + fileName);
 
 		byte[] ivBytes = new byte[16];
 
@@ -453,6 +448,125 @@ public class CryptoPrimitives {
 
 	// ***********************************************************************************************//
 
+	///////////////////// Online Cipher Implementation of HCBC1 of Bellare et
+	///////////////////// al. with AES-CTR block cipher
+	//////////////////// and hash function SHA-256
+	///////////////////// (http://eprint.iacr.org/2007/197)/////////////////////////////
+
+	// ***********************************************************************************************//
+
+	public static boolean[][] onlineCipher(byte[] keyHash, byte[] keyEnc, boolean[] plaintext) throws IOException,
+			InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException {
+
+		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+
+		// Block extension using Block expansion function
+		int blockSize = 128;
+		boolean[][] blocks = new boolean[plaintext.length][blockSize];
+
+		// le premier block contient le vecteur d�ntialization
+		boolean[][] tmpResults1 = new boolean[plaintext.length + 1][blockSize];
+		tmpResults1[0] = new boolean[blockSize];
+		;
+
+		// temporary results 2
+		boolean[][] tmpResults2 = new boolean[plaintext.length][blockSize];
+
+		// final results
+		boolean[][] results = new boolean[plaintext.length][blockSize];
+
+		for (int i = 0; i < plaintext.length; i++) {
+			// we have one bit and we add 127 bits to it
+			blocks[i][0] = plaintext[i];
+			for (int j = 1; j < blockSize; j++) {
+				blocks[i][j] = false;
+			}
+		}
+
+		SecretKeySpec key = new SecretKeySpec(keyEnc, "AES");
+
+		Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding", "BC");
+
+		cipher.init(Cipher.ENCRYPT_MODE, key);
+		for (int i = 0; i < plaintext.length; i++) {
+			byte[] hmac = CryptoPrimitives.generateHmac(keyHash, CryptoPrimitives.booleanToString(tmpResults1[i]));
+
+			for (int j = 0; j < blockSize; j++) {
+				tmpResults2[i][j] = (CryptoPrimitives.getBit(hmac, j) != 0) ^ blocks[i][j];
+			}
+
+			ByteArrayInputStream bIn = new ByteArrayInputStream(CryptoPrimitives.booleanToBytes(tmpResults2[i]));
+
+			CipherInputStream cIn = new CipherInputStream(bIn, cipher);
+
+			ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+			int ch;
+			while ((ch = cIn.read()) >= 0) {
+				bOut.write(ch);
+			}
+			results[i] = CryptoPrimitives.bytesToBoolean(bOut.toByteArray());
+			tmpResults1[i + 1] = results[i];
+
+		}
+
+		return results;
+
+	}
+
+	// ***********************************************************************************************//
+
+	///////////////////// Enhanced implementation: Online Cipher Implementation
+	///////////////////// of HCBC1 of Bellare et al. with AES-CTR block cipher
+	//////////////////// and hash function SHA-256
+	///////////////////// (http://eprint.iacr.org/2007/197)/////////////////////////////
+
+	// ***********************************************************************************************//
+
+	public static byte[][] onlineCipherOWF(byte[] keyHash, byte[] keyHash2, boolean[] plaintext) throws IOException,
+			InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException {
+
+		// Block extension using Block expansion function (in bytes)
+		int blockSize = 32;
+		byte[][] blocks = new byte[plaintext.length][blockSize];
+
+		// le premier block contient le vecteur d�ntialization
+		byte[][] tmpResults1 = new byte[plaintext.length + 1][blockSize];
+		tmpResults1[0] = new byte[blockSize];
+		;
+
+		// temporary results 2
+		byte[][] tmpResults2 = new byte[plaintext.length][blockSize];
+
+		// final results
+		byte[][] results = new byte[plaintext.length][blockSize];
+
+		for (int i = 0; i < plaintext.length; i++) {
+			// we have one byte and we pad to 32 bytes
+			blocks[i][0] = (byte) (plaintext[i] ? 1 : 0);
+			for (int j = 1; j < blockSize; j++) {
+				blocks[i][j] = 0;
+			}
+		}
+
+		for (int i = 0; i < plaintext.length; i++) {
+
+			byte[] hmac = CryptoPrimitives.generateHmac(keyHash, tmpResults1[i]);
+
+			int j = 0;
+			for (byte b : hmac)
+				tmpResults2[i][j] = (byte) (b ^ blocks[i][j++]);
+
+			results[i] = CryptoPrimitives.generateHmac(keyHash2, tmpResults2[i]);
+			tmpResults1[i + 1] = results[i];
+
+		}
+
+		return results;
+
+	}
+
+	// ***********************************************************************************************//
+
 	///////////////////// Generic Read and Write Byte to files
 	///////////////////// /////////////////////////////
 
@@ -636,155 +750,4 @@ public class CryptoPrimitives {
 		return c;
 	}
 
-	// ***********************************************************************************************//
-
-	///////////////////// Circular hashing /////////////////////////////
-
-	// ***********************************************************************************************//
-
-	public static boolean[] circular(byte[] key, boolean[] message) throws UnsupportedEncodingException {
-		boolean result[] = new boolean[message.length];
-		String tmpResult = "";
-		String tmpMes = "";
-
-		for (int i = message.length - 1; i >= 0; i--) {
-
-			tmpMes = tmpMes + String.valueOf(message[i]);
-
-			byte[] cmac = CryptoPrimitives.generateCmac(key, tmpResult + tmpMes);
-			tmpResult = tmpResult + String.valueOf(CryptoPrimitives.getBit(cmac, 0) != 0);
-			result[i] = (CryptoPrimitives.getBit(cmac, 0) != 0);
-
-		}
-
-		return result;
-	}
-
-	public static boolean circularXOR(boolean[] message) {
-		boolean result = false;
-		for (int i = 0; i < message.length; i++) {
-			result = result ^ message[i];
-		}
-		System.out.print(" RESULT \t" + result);
-		return result;
-	}
-
-	// ***********************************************************************************************//
-
-	///////////////////// Online Cipher Implementation of HCBC1 of Bellare et
-	///////////////////// al. with AES-CTR block cipher
-	//////////////////// and hash function SHA-256
-	///////////////////// (http://eprint.iacr.org/2007/197)/////////////////////////////
-
-	// ***********************************************************************************************//
-
-	public static boolean[][] onlineCipher(byte[] keyHash, byte[] keyEnc, boolean[] plaintext) throws IOException,
-			InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException {
-
-		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-
-		// Block extension using Block expansion function
-		int blockSize = 128;
-		boolean[][] blocks = new boolean[plaintext.length][blockSize];
-
-		// le premier block contient le vecteur d�ntialization
-		boolean[][] tmpResults1 = new boolean[plaintext.length + 1][blockSize];
-		tmpResults1[0] = new boolean[blockSize];
-		;
-
-		// temporary results 2
-		boolean[][] tmpResults2 = new boolean[plaintext.length][blockSize];
-
-		// final results
-		boolean[][] results = new boolean[plaintext.length][blockSize];
-
-		for (int i = 0; i < plaintext.length; i++) {
-			// we have one bit and we add 127 bits to it
-			blocks[i][0] = plaintext[i];
-			for (int j = 1; j < blockSize; j++) {
-				blocks[i][j] = false;
-			}
-		}
-
-		SecretKeySpec key = new SecretKeySpec(keyEnc, "AES");
-
-		Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding", "BC");
-
-		cipher.init(Cipher.ENCRYPT_MODE, key);
-		for (int i = 0; i < plaintext.length; i++) {
-			byte[] hmac = CryptoPrimitives.generateHmac(keyHash, CryptoPrimitives.booleanToString(tmpResults1[i]));
-
-			for (int j = 0; j < blockSize; j++) {
-				tmpResults2[i][j] = (CryptoPrimitives.getBit(hmac, j) != 0) ^ blocks[i][j];
-			}
-
-			ByteArrayInputStream bIn = new ByteArrayInputStream(CryptoPrimitives.booleanToBytes(tmpResults2[i]));
-
-			CipherInputStream cIn = new CipherInputStream(bIn, cipher);
-
-			ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-			int ch;
-			while ((ch = cIn.read()) >= 0) {
-				bOut.write(ch);
-			}
-			results[i] = CryptoPrimitives.bytesToBoolean(bOut.toByteArray());
-			tmpResults1[i + 1] = results[i];
-
-		}
-
-		return results;
-
-	}
-
-	// ***********************************************************************************************//
-
-	///////////////////// Enhanced implementation: Online Cipher Implementation
-	///////////////////// of HCBC1 of Bellare et al. with AES-CTR block cipher
-	//////////////////// and hash function SHA-256
-	///////////////////// (http://eprint.iacr.org/2007/197)/////////////////////////////
-
-	// ***********************************************************************************************//
-
-	public static byte[][] onlineCipherOWF(byte[] keyHash, byte[] keyHash2, boolean[] plaintext) throws IOException,
-			InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException {
-
-		// Block extension using Block expansion function (in bytes)
-		int blockSize = 32;
-		byte[][] blocks = new byte[plaintext.length][blockSize];
-
-		// le premier block contient le vecteur d�ntialization
-		byte[][] tmpResults1 = new byte[plaintext.length + 1][blockSize];
-		tmpResults1[0] = new byte[blockSize];
-		;
-
-		// temporary results 2
-		byte[][] tmpResults2 = new byte[plaintext.length][blockSize];
-
-		// final results
-		byte[][] results = new byte[plaintext.length][blockSize];
-
-		for (int i = 0; i < plaintext.length; i++) {
-			// we have one byte and we pad to 32 bytes
-			blocks[i][0] = (byte) (plaintext[i] ? 1 : 0);
-			for (int j = 1; j < blockSize; j++) {
-				blocks[i][j] = 0;
-			}
-		}
-
-		for (int i = 0; i < plaintext.length; i++) {
-
-			byte[] hmac = CryptoPrimitives.generateHmac(keyHash, tmpResults1[i]);
-
-			int j = 0;
-			for (byte b : hmac)
-				tmpResults2[i][j] = (byte) (b ^ blocks[i][j++]);
-
-			results[i] = CryptoPrimitives.generateHmac(keyHash2, tmpResults2[i]);
-			tmpResults1[i + 1] = results[i];
-
-		}
-
-		return results;
-
-	}
 }

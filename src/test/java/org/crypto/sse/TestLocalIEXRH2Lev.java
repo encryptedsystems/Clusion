@@ -14,7 +14,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 package org.crypto.sse;
 
 //***********************************************************************************************//
@@ -72,7 +71,7 @@ public class TestLocalIEXRH2Lev {
 
 		RH2Lev.master = listSK.get(0);
 
-		IEXRH2Lev disj = IEXRH2Lev.setupDISJ(listSK, TextExtractPar.lp1, TextExtractPar.lp2, bigBlock, smallBlock, 0);
+		IEXRH2Lev disj = IEXRH2Lev.setup(listSK, TextExtractPar.lp1, TextExtractPar.lp2, bigBlock, smallBlock, 0);
 
 		long endTime2 = System.nanoTime();
 		long totalTime2 = endTime2 - startTime2;
@@ -145,7 +144,7 @@ public class TestLocalIEXRH2Lev {
 
 			long startTime3 = System.nanoTime();
 
-			Set<String> tmpBol = IEXRH2Lev.testDIS(IEXRH2Lev.genToken(listSK, searchBol), disj);
+			Set<String> tmpBol = IEXRH2Lev.query(IEXRH2Lev.token(listSK, searchBol), disj);
 
 			for (int i = 1; i < bool.length; i++) {
 				Set<String> finalResult = new HashSet<String>();
@@ -156,9 +155,9 @@ public class TestLocalIEXRH2Lev {
 						searchTMP.add(bool[i][r]);
 					}
 
-					List<TokenDIS> tokenTMP = IEXRH2Lev.genToken(listSK, searchTMP);
+					List<TokenDIS> tokenTMP = IEXRH2Lev.token(listSK, searchTMP);
 
-					Set<String> result = new HashSet<String>(RH2Lev.testSI(tokenTMP.get(0).getTokenMMGlobal(),
+					Set<String> result = new HashSet<String>(RH2Lev.query(tokenTMP.get(0).getTokenMMGlobal(),
 							disj.getGlobalMM().getDictionary(), disj.getGlobalMM().getArray()));
 
 					if (!(tmpBol.size() == 0)) {
@@ -170,13 +169,13 @@ public class TestLocalIEXRH2Lev {
 							for (int j = 0; j < tokenTMP.get(0).getTokenMMLocal().size(); j++) {
 
 								Set<String> temporary = new HashSet<String>();
-								List<String> tempoList = RH2Lev.testSI(tokenTMP.get(0).getTokenMMLocal().get(j),
+								List<String> tempoList = RH2Lev.query(tokenTMP.get(0).getTokenMMLocal().get(j),
 										disj.getLocalMultiMap()[pos].getDictionary(),
 										disj.getLocalMultiMap()[pos].getArray());
 
 								if (!(tempoList == null)) {
 									temporary = new HashSet<String>(
-											RH2Lev.testSI(tokenTMP.get(0).getTokenMMLocal().get(j),
+											RH2Lev.query(tokenTMP.get(0).getTokenMMLocal().get(j),
 													disj.getLocalMultiMap()[pos].getDictionary(),
 													disj.getLocalMultiMap()[pos].getArray()));
 								}

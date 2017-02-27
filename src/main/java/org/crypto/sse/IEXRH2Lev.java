@@ -14,10 +14,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 //***********************************************************************************************//
 
-// This file contains IEX-2Lev implementation for response hiding. KeyGen, Setup, Token and Test algorithms. 
+// This file contains IEX-2Lev implementation for response hiding. KeyGen, Setup, Token and Query algorithms. 
 // We also propose an implementation of a possible filtering mechanism that reduces the storage overhead. 
 
 //***********************************************************************************************//	
@@ -81,7 +80,7 @@ public class IEXRH2Lev implements Serializable {
 
 	// ***********************************************************************************************//
 
-	///////////////////// KeyGen /////////////////////////////
+	///////////////////// Key Generation /////////////////////////////
 
 	// ***********************************************************************************************//
 
@@ -91,8 +90,8 @@ public class IEXRH2Lev implements Serializable {
 		List<byte[]> listOfkeys = new ArrayList<byte[]>();
 
 		// Generation of two keys for Secure inverted index
-		listOfkeys.add(InvertedIndex.keyGenSI(keySize, password + "secureIndex", filePathString, icount));
-		listOfkeys.add(InvertedIndex.keyGenSI(keySize, password + "dictionary", filePathString, icount));
+		listOfkeys.add(TSet.keyGen(keySize, password + "secureIndex", filePathString, icount));
+		listOfkeys.add(TSet.keyGen(keySize, password + "dictionary", filePathString, icount));
 
 		// Generation of one key for encryption
 		listOfkeys.add(ZMF.keyGenSM(keySize, password + "encryption", filePathString, icount));
@@ -107,9 +106,8 @@ public class IEXRH2Lev implements Serializable {
 
 	// ***********************************************************************************************//
 
-	public static IEXRH2Lev setupDISJ(List<byte[]> keys, Multimap<String, String> lookup,
-			Multimap<String, String> lookup2, int bigBlock, int smallBlock, int dataSize)
-			throws InterruptedException, ExecutionException, IOException {
+	public static IEXRH2Lev setup(List<byte[]> keys, Multimap<String, String> lookup, Multimap<String, String> lookup2,
+			int bigBlock, int smallBlock, int dataSize) throws InterruptedException, ExecutionException, IOException {
 
 		// Instantiation of the object that contains Global MM, Local MMs and
 		// the dictionary
@@ -131,12 +129,9 @@ public class IEXRH2Lev implements Serializable {
 
 		int counter = 0;
 
-		// ***********************************************************************************************//
-
 		///////////////////// Computing Filtering Factor and exact needed data
 		///////////////////// size/////////////////////////////
 
-		// ***********************************************************************************************//
 		HashMap<Integer, Integer> histogram = new HashMap<Integer, Integer>();
 		System.out.println("Number of documents " + lookup2.keySet().size());
 		for (String keyword : lookup.keySet()) {
@@ -259,11 +254,11 @@ public class IEXRH2Lev implements Serializable {
 
 	// ***********************************************************************************************//
 
-	///////////////////// Token Generation /////////////////////////////
+	///////////////////// Search Token Generation /////////////////////////////
 
 	// ***********************************************************************************************//
 
-	public static List<TokenDIS> genToken(List<byte[]> listOfkeys, List<String> search)
+	public static List<TokenDIS> token(List<byte[]> listOfkeys, List<String> search)
 			throws UnsupportedEncodingException {
 		List<TokenDIS> token = new ArrayList<TokenDIS>();
 
@@ -283,18 +278,18 @@ public class IEXRH2Lev implements Serializable {
 
 	// ***********************************************************************************************//
 
-	///////////////////// TEST /////////////////////////////
+	///////////////////// Query Algorithm /////////////////////////////
 
 	// ***********************************************************************************************//
 
-	public static Set<String> testDIS(List<TokenDIS> token, IEXRH2Lev disj)
+	public static Set<String> query(List<TokenDIS> token, IEXRH2Lev disj)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
 			NoSuchProviderException, NoSuchPaddingException, IOException {
 
 		Set<String> finalResult = new TreeSet<String>();
 		for (int i = 0; i < token.size(); i++) {
 
-			Set<String> result = new HashSet<String>(RH2Lev.testSI(token.get(i).getTokenMMGlobal(),
+			Set<String> result = new HashSet<String>(RH2Lev.query(token.get(i).getTokenMMGlobal(),
 					disj.getGlobalMM().getDictionary(), disj.getGlobalMM().getArray()));
 
 			if (!(result.size() == 0)) {
@@ -307,11 +302,11 @@ public class IEXRH2Lev implements Serializable {
 					for (int j = 0; j < token.get(i).getTokenMMLocal().size(); j++) {
 
 						Set<String> temporary = new HashSet<String>();
-						List<String> tempoList = RH2Lev.testSI(token.get(i).getTokenMMLocal().get(j),
+						List<String> tempoList = RH2Lev.query(token.get(i).getTokenMMLocal().get(j),
 								disj.getLocalMultiMap()[pos].getDictionary(), disj.getLocalMultiMap()[pos].getArray());
 
 						if (!(tempoList == null)) {
-							temporary = new HashSet<String>(RH2Lev.testSI(token.get(i).getTokenMMLocal().get(j),
+							temporary = new HashSet<String>(RH2Lev.query(token.get(i).getTokenMMLocal().get(j),
 									disj.getLocalMultiMap()[pos].getDictionary(),
 									disj.getLocalMultiMap()[pos].getArray()));
 						}

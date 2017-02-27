@@ -14,9 +14,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 //***********************************************************************************************//
-// Record Object description used to better handle the matryoshka filters
+// Record Object description used to better handle the Matryoshka filters along with the encrypted
+// documents identifiers.
 //***********************************************************************************************//
 
 package org.crypto.sse;

@@ -14,7 +14,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 package org.crypto.sse;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -49,7 +48,7 @@ import java.util.concurrent.*;
 
 //***********************************************************************************************//	
 
-public class MMGlobal implements Serializable {
+public class RR2Lev implements Serializable {
 
 	// define the number of character that a file identifier can have
 	public static int sizeOfFileIdentifer = 40;
@@ -61,7 +60,7 @@ public class MMGlobal implements Serializable {
 	static byte[][] array = null;
 	byte[][] arr = null;
 
-	public MMGlobal(Multimap<String, byte[]> dictionary, byte[][] arr) {
+	public RR2Lev(Multimap<String, byte[]> dictionary, byte[][] arr) {
 		this.dictionary = dictionary;
 		this.arr = arr;
 	}
@@ -84,11 +83,11 @@ public class MMGlobal implements Serializable {
 
 	// ***********************************************************************************************//
 
-	///////////////////// KeyGenSI /////////////////////////////
+	///////////////////// Key Generation /////////////////////////////
 
 	// ***********************************************************************************************//
 
-	public static byte[] keyGenSI(int keySize, String password, String filePathString, int icount)
+	public static byte[] keyGen(int keySize, String password, String filePathString, int icount)
 			throws InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException {
 		File f = new File(filePathString);
 		byte[] salt = null;
@@ -112,12 +111,10 @@ public class MMGlobal implements Serializable {
 
 	// ***********************************************************************************************//
 
-	public static MMGlobal constructEMMPar(final byte[] key, final Multimap<String, String> lookup, final int bigBlock,
+	public static RR2Lev constructEMMPar(final byte[] key, final Multimap<String, String> lookup, final int bigBlock,
 			final int smallBlock, final int dataSize) throws InterruptedException, ExecutionException, IOException {
 
 		final Multimap<String, byte[]> dictionary = ArrayListMultimap.create();
-
-		// System.out.println("\t Initialization of free set \n");
 
 		for (int i = 0; i < dataSize; i++) {
 			// initialize all buckets with random values
@@ -134,9 +131,6 @@ public class MMGlobal implements Serializable {
 
 		ExecutorService service = Executors.newFixedThreadPool(threads);
 		ArrayList<String[]> inputs = new ArrayList<String[]>(threads);
-
-		// System.out.println("\t Partitionning the dictionary for parallel
-		// computation \n");
 
 		final Map<Integer, String> concurrentMap = new ConcurrentHashMap<Integer, String>();
 		for (int i = 0; i < listOfKeyword.size(); i++) {
@@ -167,10 +161,8 @@ public class MMGlobal implements Serializable {
 						concurrentMap.remove(listOfPossibleKeywords.get(temp));
 
 						try {
-							// bloomFilterList.addAll(secureSetMPar(input,keySM,
-							// keyInvInd, maxLengthOfMask, falsePosRate));
-							Multimap<String, byte[]> output = setupSI(key, input, lookup, bigBlock, smallBlock,
-									dataSize);
+
+							Multimap<String, byte[]> output = setup(key, input, lookup, bigBlock, smallBlock, dataSize);
 							Set<String> keys = output.keySet();
 
 							for (String k : keys) {
@@ -193,16 +185,13 @@ public class MMGlobal implements Serializable {
 		// request
 		service.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
 
-		return new MMGlobal(dictionary, array);
+		return new RR2Lev(dictionary, array);
 	}
 
-	public static MMGlobal constructEMMParGMM(final byte[] key, final Multimap<String, String> lookup,
-			final int bigBlock, final int smallBlock, final int dataSize)
-			throws InterruptedException, ExecutionException, IOException {
+	public static RR2Lev constructEMMParGMM(final byte[] key, final Multimap<String, String> lookup, final int bigBlock,
+			final int smallBlock, final int dataSize) throws InterruptedException, ExecutionException, IOException {
 
 		final Multimap<String, byte[]> dictionary = ArrayListMultimap.create();
-
-		// System.out.println("\t Initialization of free set \n");
 
 		for (int i = 0; i < dataSize; i++) {
 			// initialize all buckets with random values
@@ -219,9 +208,6 @@ public class MMGlobal implements Serializable {
 
 		ExecutorService service = Executors.newFixedThreadPool(threads);
 		ArrayList<String[]> inputs = new ArrayList<String[]>(threads);
-
-		// System.out.println("\t Partitionning the dictionary for parallel
-		// computation \n");
 
 		for (int i = 0; i < threads; i++) {
 			String[] tmp;
@@ -247,7 +233,7 @@ public class MMGlobal implements Serializable {
 			Callable<Multimap<String, byte[]>> callable = new Callable<Multimap<String, byte[]>>() {
 				public Multimap<String, byte[]> call() throws Exception {
 
-					Multimap<String, byte[]> output = setupSI(key, input, lookup, bigBlock, smallBlock, dataSize);
+					Multimap<String, byte[]> output = setup(key, input, lookup, bigBlock, smallBlock, dataSize);
 					return output;
 				}
 			};
@@ -265,7 +251,7 @@ public class MMGlobal implements Serializable {
 
 		}
 
-		return new MMGlobal(dictionary, array);
+		return new RR2Lev(dictionary, array);
 	}
 
 	// ***********************************************************************************************//
@@ -274,7 +260,7 @@ public class MMGlobal implements Serializable {
 
 	// ***********************************************************************************************//
 
-	public static Multimap<String, byte[]> setupSI(byte[] key, String[] listOfKeyword, Multimap<String, String> lookup,
+	public static Multimap<String, byte[]> setup(byte[] key, String[] listOfKeyword, Multimap<String, String> lookup,
 			int bigBlock, int smallBlock, int dataSize) throws InvalidKeyException, InvalidAlgorithmParameterException,
 			NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException {
 
@@ -416,14 +402,12 @@ public class MMGlobal implements Serializable {
 
 	// ***********************************************************************************************//
 
-	///////////////////// Token generation based On NDSS paper
+	///////////////////// Search Token generation /////////////////////
 	///////////////////// /////////////////////////////
 
 	// ***********************************************************************************************//
 
-	// output two keys
-
-	public static byte[][] genToken(byte[] key, String word) throws UnsupportedEncodingException {
+	public static byte[][] token(byte[] key, String word) throws UnsupportedEncodingException {
 
 		byte[][] keys = new byte[2][];
 		keys[0] = CryptoPrimitives.generateCmac(key, 1 + word);
@@ -434,11 +418,11 @@ public class MMGlobal implements Serializable {
 
 	// ***********************************************************************************************//
 
-	///////////////////// TestSI /////////////////////////////
+	///////////////////// Query Alg /////////////////////////////
 
 	// ***********************************************************************************************//
 
-	public static List<String> testSI(byte[][] keys, Multimap<String, byte[]> dictionary, byte[][] array)
+	public static List<String> query(byte[][] keys, Multimap<String, byte[]> dictionary, byte[][] array)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
 			NoSuchProviderException, NoSuchPaddingException, IOException {
 

@@ -1,3 +1,27 @@
+/** * Copyright (C) 2016 Tarik Moataz
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+//***********************************************************************************************//
+
+/////////////////////    Implementation of a dynamic Forward Secure SSE (a variant of the Cash et al. NDSS'14)
+
+/////////////////////				Response Hiding with add operations					///////////
+
+//***********************************************************************************************//	
+
 package org.crypto.sse;
 
 import java.io.IOException;
@@ -35,7 +59,7 @@ public class DynRH2Lev extends RH2Lev {
 
 	// ***********************************************************************************************//
 
-	///////////////////// SetupSI /////////////////////////////
+	///////////////////// Setup /////////////////////////////
 
 	// ***********************************************************************************************//
 
@@ -45,13 +69,19 @@ public class DynRH2Lev extends RH2Lev {
 
 		RH2Lev result = constructEMMPar(key, lookup, bigBlock, smallBlock, dataSize);
 
-		System.out.println("Initialization of the Update Encrypted Dictionary\n");
+		System.out.println("Initialization of the Encrypted Dictionary that will handle the updates:\n");
 
 		HashMap<String, byte[]> dictionaryUpdates = new HashMap<String, byte[]>();
 
 		return new DynRH2Lev(result.getDictionary(), result.getArray(), dictionaryUpdates);
 
 	}
+
+	// ***********************************************************************************************//
+
+	///////////////////// Update Token /////////////////////////////
+
+	// ***********************************************************************************************//
 
 	public static TreeMultimap<String, byte[]> tokenUpdate(byte[] key, Multimap<String, String> lookup)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
@@ -117,7 +147,7 @@ public class DynRH2Lev extends RH2Lev {
 
 	// ***********************************************************************************************//
 
-	///////////////////// Token generation
+	///////////////////// Search Token /////////////////////
 	///////////////////// /////////////////////////////
 
 	// ***********************************************************************************************//
@@ -139,15 +169,15 @@ public class DynRH2Lev extends RH2Lev {
 
 	// ***********************************************************************************************//
 
-	///////////////////// TestSI /////////////////////////////
+	///////////////////// Test /////////////////////////////
 
 	// ***********************************************************************************************//
 
-	public static List<String> testSI(byte[][] keys, Multimap<String, byte[]> dictionary, byte[][] array,
+	public static List<String> query(byte[][] keys, Multimap<String, byte[]> dictionary, byte[][] array,
 			HashMap<String, byte[]> dictionaryUpdates) throws InvalidKeyException, InvalidAlgorithmParameterException,
 			NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException {
 
-		List<String> result = testSI(keys, dictionary, array);
+		List<String> result = query(keys, dictionary, array);
 
 		for (int i = 0; i < ByteBuffer.wrap(keys[3]).getInt(); i++) {
 			byte[] temp = dictionaryUpdates.get(new String(CryptoPrimitives.generateCmac(keys[2], "" + i)));
@@ -164,7 +194,7 @@ public class DynRH2Lev extends RH2Lev {
 
 	// ***********************************************************************************************//
 
-	///////////////////// Forward Secure Token generation
+	///////////////////// Forward Secure Token generation /////////////////////
 	///////////////////// /////////////////////////////
 
 	// ***********************************************************************************************//
@@ -189,15 +219,15 @@ public class DynRH2Lev extends RH2Lev {
 
 	// ***********************************************************************************************//
 
-	///////////////////// Forward Secure TestSI /////////////////////////////
+	///////////////////// Forward Secure Query /////////////////////////////
 
 	// ***********************************************************************************************//
 
-	public static List<String> testSIFS(byte[][] keys, Multimap<String, byte[]> dictionary, byte[][] array,
+	public static List<String> queryFS(byte[][] keys, Multimap<String, byte[]> dictionary, byte[][] array,
 			HashMap<String, byte[]> dictionaryUpdates) throws InvalidKeyException, InvalidAlgorithmParameterException,
 			NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException {
 
-		List<String> result = testSI(keys, dictionary, array);
+		List<String> result = query(keys, dictionary, array);
 
 		for (int i = 0; i < keys.length - 2; i++) {
 			byte[] temp = dictionaryUpdates.get(new String(keys[2 + i]));

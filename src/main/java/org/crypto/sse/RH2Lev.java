@@ -14,7 +14,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 //***********************************************************************************************//
 
 /////////////////////    Implementation of 2Lev scheme of NDSS'14 
@@ -89,8 +88,6 @@ public class RH2Lev {
 
 		final Multimap<String, byte[]> dictionary = ArrayListMultimap.create();
 
-		// System.out.println("\t Initialization of free set \n");
-
 		for (int i = 0; i < dataSize; i++) {
 			// initialize all buckets with random values
 			free.add(i);
@@ -107,9 +104,6 @@ public class RH2Lev {
 		ExecutorService service = Executors.newFixedThreadPool(threads);
 		ArrayList<String[]> inputs = new ArrayList<String[]>(threads);
 
-		// System.out.println("\t Partitionning the dictionary for parallel
-		// computation \n");
-
 		final Map<Integer, String> concurrentMap = new ConcurrentHashMap<Integer, String>();
 		for (int i = 0; i < listOfKeyword.size(); i++) {
 			concurrentMap.put(i, listOfKeyword.get(i));
@@ -122,7 +116,6 @@ public class RH2Lev {
 				public void run() {
 
 					while (concurrentMap.keySet().size() > 0) {
-						// write code
 						Set<Integer> possibleValues = concurrentMap.keySet();
 
 						Random rand = new Random();
@@ -139,10 +132,8 @@ public class RH2Lev {
 						concurrentMap.remove(listOfPossibleKeywords.get(temp));
 
 						try {
-							// bloomFilterList.addAll(secureSetMPar(input,keySM,
-							// keyInvInd, maxLengthOfMask, falsePosRate));
-							Multimap<String, byte[]> output = setupSI(key, input, lookup, bigBlock, smallBlock,
-									dataSize);
+
+							Multimap<String, byte[]> output = setup(key, input, lookup, bigBlock, smallBlock, dataSize);
 							Set<String> keys = output.keySet();
 
 							for (String k : keys) {
@@ -158,7 +149,6 @@ public class RH2Lev {
 			});
 		}
 
-		// Make sure executor stops
 		service.shutdown();
 
 		// Blocks until all tasks have completed execution after a shutdown
@@ -172,8 +162,6 @@ public class RH2Lev {
 			final int smallBlock, final int dataSize) throws InterruptedException, ExecutionException, IOException {
 
 		final Multimap<String, byte[]> dictionary = ArrayListMultimap.create();
-
-		// System.out.println("\t Initialization of free set \n");
 
 		for (int i = 0; i < dataSize; i++) {
 			// initialize all buckets with random values
@@ -190,9 +178,6 @@ public class RH2Lev {
 
 		ExecutorService service = Executors.newFixedThreadPool(threads);
 		ArrayList<String[]> inputs = new ArrayList<String[]>(threads);
-
-		// System.out.println("\t Partitionning the dictionary for parallel
-		// computation \n");
 
 		for (int i = 0; i < threads; i++) {
 			String[] tmp;
@@ -218,7 +203,7 @@ public class RH2Lev {
 			Callable<Multimap<String, byte[]>> callable = new Callable<Multimap<String, byte[]>>() {
 				public Multimap<String, byte[]> call() throws Exception {
 
-					Multimap<String, byte[]> output = setupSI(key, input, lookup, bigBlock, smallBlock, dataSize);
+					Multimap<String, byte[]> output = setup(key, input, lookup, bigBlock, smallBlock, dataSize);
 					return output;
 				}
 			};
@@ -241,18 +226,17 @@ public class RH2Lev {
 
 	// ***********************************************************************************************//
 
-	///////////////////// SetupSI /////////////////////////////
+	///////////////////// Setup /////////////////////////////
 
 	// ***********************************************************************************************//
 
-	public static Multimap<String, byte[]> setupSI(byte[] key, String[] listOfKeyword, Multimap<String, String> lookup,
+	public static Multimap<String, byte[]> setup(byte[] key, String[] listOfKeyword, Multimap<String, String> lookup,
 			int bigBlock, int smallBlock, int dataSize) throws InvalidKeyException, InvalidAlgorithmParameterException,
 			NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException {
 
 		// determine the size f the data set and therefore the size of the array
 		array = new byte[dataSize][];
 		Multimap<String, byte[]> gamma = ArrayListMultimap.create();
-		long startTime = System.nanoTime();
 
 		for (String word : listOfKeyword) {
 
@@ -333,12 +317,6 @@ public class RH2Lev {
 					}
 
 					// generate the integer which is associated to free[b]
-
-					// System.out.println("Free Size "+free.size());
-
-					// System.out.println("Free Size details "+(int)
-					// Math.ceil(((float)
-					// Math.log(free.size())/(Math.log(2)*8))));
 
 					byte[] randomBytes = CryptoPrimitives
 							.randomBytes((int) Math.ceil(((float) Math.log(free.size()) / (Math.log(2) * 8))));
@@ -439,19 +417,17 @@ public class RH2Lev {
 			}
 
 		}
-		long endTime = System.nanoTime();
-		long totalTime = endTime - startTime;
-		// System.out.println("Time for one (w, id) "+totalTime/lookup.size());
+
 		return gamma;
 	}
 
 	// ***********************************************************************************************//
 
-	///////////////////// TestSI /////////////////////////////
+	///////////////////// Query /////////////////////////////
 
 	// ***********************************************************************************************//
 
-	public static List<String> testSI(byte[][] keys, Multimap<String, byte[]> dictionary, byte[][] array)
+	public static List<String> query(byte[][] keys, Multimap<String, byte[]> dictionary, byte[][] array)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
 			NoSuchProviderException, NoSuchPaddingException, IOException {
 

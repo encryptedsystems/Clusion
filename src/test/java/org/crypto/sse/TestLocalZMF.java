@@ -14,7 +14,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /*
  * This class is a test for the ZMF construction. 
  * It tests for conjunctive queries where the client outputs two keywords that he wants to search for and the search will output the number of documents that contain 

@@ -14,7 +14,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 //***********************************************************************************************//
 // SecureSetMFormat Object description
 //***********************************************************************************************//
@@ -23,12 +22,12 @@ package org.crypto.sse;
 
 import java.io.Serializable;
 
-public class SecureSetMFormat implements Serializable {
+public class ZMFFormat implements Serializable {
 
 	public boolean[] secureSetM;
 	public String identifier;
 
-	public SecureSetMFormat(boolean[] secureSetM, String identifier) {
+	public ZMFFormat(boolean[] secureSetM, String identifier) {
 		this.identifier = identifier;
 		this.secureSetM = secureSetM;
 	}

@@ -14,7 +14,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 //***********************************************************************************************//
 // This file is to test the 2Lev construction by Cash et al. NDSS'14. 
 //**********************************************************************************************
@@ -25,7 +24,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TestLocal2Lev {
+public class TestLocalRR2Lev {
 
 	public static void main(String[] args) throws Exception {
 
@@ -35,7 +34,7 @@ public class TestLocal2Lev {
 
 		String pass = keyRead.readLine();
 
-		List<byte[]> listSK = IEX2Lev.keyGen(256, pass, "salt/salt", 100);
+		List<byte[]> listSK = IEX2Lev.keyGen(256, pass, "salt/salt", 100000);
 
 		System.out.println("Enter the relative path name of the folder that contains the files to make searchable");
 
@@ -53,18 +52,17 @@ public class TestLocal2Lev {
 		int dataSize = 10000;
 
 		// Construction of the global multi-map
-		System.out.println("\nBeginning of Global MM creation \n");
+		System.out.println("\nBeginning of Encrypted Multi-map creation \n");
 
-		MMGlobal twolev = MMGlobal.constructEMMParGMM(listSK.get(0), TextExtractPar.lp1, bigBlock, smallBlock,
-				dataSize);
+		RR2Lev twolev = RR2Lev.constructEMMParGMM(listSK.get(0), TextExtractPar.lp1, bigBlock, smallBlock, dataSize);
 
 		while (true) {
 
 			System.out.println("Enter the keyword to search for:");
 			String keyword = keyRead.readLine();
-			byte[][] token = MMGlobal.genToken(listSK.get(0), keyword);
+			byte[][] token = RR2Lev.token(listSK.get(0), keyword);
 
-			System.out.println("Final Result: " + twolev.testSI(token, twolev.getDictionary(), twolev.getArray()));
+			System.out.println("Final Result: " + twolev.query(token, twolev.getDictionary(), twolev.getArray()));
 
 		}
 

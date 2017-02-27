@@ -14,7 +14,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 //***********************************************************************************************//
 // Information to manipulate Bloom Filters
 //***********************************************************************************************//
@@ -23,12 +22,12 @@ package org.crypto.sse;
 
 import java.io.Serializable;
 
-public class InvertedIndexResultFormat implements Serializable {
+public class TSetResultFormat implements Serializable {
 
 	public byte[] encryptedID;
 	public byte[] bloomFilterId;
 
-	public InvertedIndexResultFormat(byte[] encryptedID, byte[] bloomFilterId) {
+	public TSetResultFormat(byte[] encryptedID, byte[] bloomFilterId) {
 		this.encryptedID = encryptedID;
 		this.bloomFilterId = bloomFilterId;
 	}

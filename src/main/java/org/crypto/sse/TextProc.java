@@ -14,7 +14,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 //***********************************************************************************************//
 
 /////////////////////    Text Parsing with a new partitioning technique 	/////////////////////////////
@@ -37,25 +36,27 @@ import java.util.concurrent.ExecutionException;
 
 public class TextProc {
 
-
-	public TextProc(int i){
+	public TextProc(int i) {
 
 	}
 
-	public static void TextProc(boolean flag, String pwd) throws IOException, InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, InvalidKeySpecException{
+	public static void TextProc(boolean flag, String pwd)
+			throws IOException, InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
+			NoSuchProviderException, NoSuchPaddingException, InvalidKeySpecException {
 
-		int counter=0;
-		ArrayList<File> listOfFile=new ArrayList<File>();
+		int counter = 0;
+		ArrayList<File> listOfFile = new ArrayList<File>();
 
-		//***********************************************************************************************//
+		// ***********************************************************************************************//
 
-		/////////////////////    TEXT PARSING and Inverted Index CREATION	/////////////////////////////
+		///////////////////// TEXT PARSING and Inverted Index CREATION
+		///////////////////// /////////////////////////////
 
-		//***********************************************************************************************//
+		// ***********************************************************************************************//
 
 		System.out.println("\n Beginning of text extraction \n");
 
-		listf(pwd, listOfFile); 
+		listf(pwd, listOfFile);
 		try {
 			TextExtractPar.extractTextPar(listOfFile);
 		} catch (InterruptedException e2) {
@@ -66,23 +67,21 @@ public class TextProc {
 			e2.printStackTrace();
 		}
 
+		// ***********************************************************************************************//
 
-		//***********************************************************************************************//
+		///////////////////// Partitioning /////////////////////////////
 
-		/////////////////////    Partitioning	/////////////////////////////
-
-		//***********************************************************************************************//		
-		if (flag){
+		// ***********************************************************************************************//
+		if (flag) {
 			Multimap<Integer, String> partitions = Partition.partitioning(TextExtractPar.lp1);
 		}
 
-
 	}
 
-
-
-	/*This method gets all files from a directory. 
- These files, will be processed later on to get all the keywords and create an inverted index structure	
+	/*
+	 * This method gets all files from a directory. These files, will be
+	 * processed later on to get all the keywords and create an inverted index
+	 * structure
 	 */
 	public static void listf(String directoryName, ArrayList<File> files) {
 		File directory = new File(directoryName);

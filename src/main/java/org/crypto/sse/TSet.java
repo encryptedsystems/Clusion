@@ -14,12 +14,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 //***********************************************************************************************//
 
 // This file contains the encrypted multi-map encryption scheme by Cash, Jarecki, Jutla, Krawczyk, Rosu, Steiner Crypto'13: implementating their proposed TSet:
 // KeyGen, Setup, Token and Test algorithms. 
-
 //***********************************************************************************************//	
 
 package org.crypto.sse;
@@ -38,7 +36,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.*;
 import java.util.concurrent.*;
 
-public class InvertedIndex {
+public class TSet {
 
 	public final static int spaceOverhead = 2;
 	public final static int subBucketSize = 200;
@@ -61,11 +59,11 @@ public class InvertedIndex {
 
 	// ***********************************************************************************************//
 
-	///////////////////// KeyGenSI /////////////////////////////
+	///////////////////// Key Generation /////////////////////////////
 
 	// ***********************************************************************************************//
 
-	public static byte[] keyGenSI(int keySize, String password, String filePathString, int icount)
+	public static byte[] keyGen(int keySize, String password, String filePathString, int icount)
 			throws InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException {
 		File f = new File(filePathString);
 		byte[] salt = null;
@@ -85,12 +83,12 @@ public class InvertedIndex {
 
 	// ***********************************************************************************************//
 
-	///////////////////// SetupSI without partitioning
+	///////////////////// Setup without partitioning /////////////////////
 	///////////////////// /////////////////////////////
 
 	// ***********************************************************************************************//
 
-	public static int setupSI(byte[] key1, byte[] key2, byte[] keyENC, String[] listOfKeyword,
+	public static int setup(byte[] key1, byte[] key2, byte[] keyENC, String[] listOfKeyword,
 			Multimap<String, String> lookup, Multimap<String, String> encryptedIdToRealId)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
 			NoSuchProviderException, NoSuchPaddingException, IOException {
@@ -285,7 +283,7 @@ public class InvertedIndex {
 			Callable<Integer> callable = new Callable<Integer>() {
 				public Integer call() throws Exception {
 
-					int output = setupSI(key1, key2, keyENC, input, lookup, encryptedIdToRealId);
+					int output = setup(key1, key2, keyENC, input, lookup, encryptedIdToRealId);
 					return 1;
 				}
 			};
@@ -298,26 +296,26 @@ public class InvertedIndex {
 
 	// ***********************************************************************************************//
 
-	///////////////////// GenTokSI /////////////////////////////
+	///////////////////// Search Token Generation /////////////////////////////
 
 	// ***********************************************************************************************//
 
-	public static byte[] genTokSI(byte[] key, String keyword) throws UnsupportedEncodingException {
+	public static byte[] token(byte[] key, String keyword) throws UnsupportedEncodingException {
 		byte[] result = CryptoPrimitives.generateCmac(key, keyword);
 		return result;
 	}
 
 	// ***********************************************************************************************//
 
-	///////////////////// TestSI without partitioning
+	///////////////////// Query without partitioning
 	///////////////////// /////////////////////////////
 
 	// ***********************************************************************************************//
 
-	public static List<InvertedIndexResultFormat> testSI(byte[] token1, byte[] token2, List<List<Record>> secureIndex,
+	public static List<TSetResultFormat> query(byte[] token1, byte[] token2, List<List<Record>> secureIndex,
 			int bucketSize) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
 			NoSuchProviderException, NoSuchPaddingException, IOException {
-		List<InvertedIndexResultFormat> result = new ArrayList<InvertedIndexResultFormat>();
+		List<TSetResultFormat> result = new ArrayList<TSetResultFormat>();
 
 		// initialize beta to 1
 		int beta = 1;
@@ -393,7 +391,7 @@ public class InvertedIndex {
 
 					// return the string of the identifier and the bloom filter
 
-					result.add(new InvertedIndexResultFormat(docId, bFId));
+					result.add(new TSetResultFormat(docId, bFId));
 
 				} else if ((counterWorNotExist == secureIndex
 						.get(CryptoPrimitives.getIntFromByte(bucket, (int) (Math.log(bucketSize) / (Math.log(2)))))

@@ -14,7 +14,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 //***********************************************************************************************//
 
 /////////////////////    This file contains the generation of the database DB, i.e., building a plaintext look-up table that associates every keyword to the set fo documents identifiers	/////////////////////////////
@@ -186,7 +185,6 @@ public class TextExtractPar implements Serializable {
 			if (file.getName().endsWith(".docx")) {
 				XWPFDocument doc;
 				try {
-					// System.out.println("File read: "+file.getName());
 
 					doc = new XWPFDocument(fis);
 					XWPFWordExtractor ex = new XWPFWordExtractor(doc);
@@ -208,7 +206,6 @@ public class TextExtractPar implements Serializable {
 
 				OPCPackage ppt;
 				try {
-					// System.out.println("File read: "+file.getName());
 
 					ppt = OPCPackage.open(fis);
 					XSLFPowerPointExtractor xw = new XSLFPowerPointExtractor(ppt);
@@ -235,7 +232,6 @@ public class TextExtractPar implements Serializable {
 
 				OPCPackage xls;
 				try {
-					// System.out.println("File read: "+file.getName());
 
 					xls = OPCPackage.open(fis);
 					XSSFExcelExtractor xe = new XSSFExcelExtractor(xls);
@@ -265,7 +261,6 @@ public class TextExtractPar implements Serializable {
 
 				NPOIFSFileSystem fs;
 				try {
-					// System.out.println("File read: "+file.getName());
 
 					fs = new NPOIFSFileSystem(file);
 					WordExtractor extractor = new WordExtractor(fs.getRoot());
@@ -289,7 +284,6 @@ public class TextExtractPar implements Serializable {
 
 				PDFParser parser;
 				try {
-					// System.out.println("File read: "+file.getName());
 
 					parser = new PDFParser(fis);
 					parser.parse();
@@ -328,7 +322,6 @@ public class TextExtractPar implements Serializable {
 
 			else {
 				try {
-					// System.out.println("File read: "+file.getName());
 
 					lines = Files.readLines(file, Charsets.UTF_8);
 				} catch (IOException e) {

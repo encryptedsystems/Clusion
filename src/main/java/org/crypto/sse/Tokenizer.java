@@ -14,7 +14,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /*Tokenizer based on Lucene. This is the core of the code and depends
  * of the input Analyzer. Standard, stop words stripping off or Snowball Porter implementations
  * can be used as an Analyzer. This part of code, given a string of keywords,
@@ -34,12 +33,13 @@ import java.util.List;
 
 public final class Tokenizer {
 
-	private Tokenizer() {}
+	private Tokenizer() {
+	}
 
 	public static List<String> tokenizeString(Analyzer analyzer, String string) {
 		List<String> result = new ArrayList<String>();
 		try {
-			TokenStream stream  = analyzer.tokenStream(null, new StringReader(string));
+			TokenStream stream = analyzer.tokenStream(null, new StringReader(string));
 			stream.reset();
 			while (stream.incrementToken()) {
 				result.add(stream.getAttribute(CharTermAttribute.class).toString());
