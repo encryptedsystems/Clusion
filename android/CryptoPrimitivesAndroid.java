@@ -15,13 +15,13 @@
  */
 
 
-import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.crypto.digests.SHA512Digest;
-import org.bouncycastle.crypto.engines.AESFastEngine;
-import org.bouncycastle.crypto.macs.CMac;
-import org.bouncycastle.crypto.macs.HMac;
-import org.bouncycastle.crypto.params.KeyParameter;
-import org.bouncycastle.crypto.prng.ThreadedSeedGenerator;
+import org.spongycastle.crypto.digests.SHA256Digest;
+import org.spongycastle.crypto.digests.SHA512Digest;
+import org.spongycastle.crypto.engines.AESFastEngine;
+import org.spongycastle.crypto.macs.CMac;
+import org.spongycastle.crypto.macs.HMac;
+import org.spongycastle.crypto.params.KeyParameter;
+import org.spongycastle.crypto.prng.ThreadedSeedGenerator;
 
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
@@ -33,7 +33,15 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Arrays;
 
+import android.util.Log;
+
+@SuppressWarnings("restriction")
 public class CryptoPrimitivesAndroid {
+
+    static {
+        Log.i("sse", "insert provider");
+        Security.addProvider(new org.spongycastle.jce.provider.BouncyCastleProvider());
+    }
 
 
 	private CryptoPrimitivesAndroid() {
@@ -206,7 +214,7 @@ public class CryptoPrimitivesAndroid {
 	public static byte[] encryptAES_CTR_String(byte[] keyBytes, byte[] ivBytes, String identifier, int sizeOfFileName)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
 			NoSuchProviderException, NoSuchPaddingException, IOException {
-		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+		//Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 		// Concatenate the title with the text. The title should be at most
 		// "sizeOfFileName" characters including 3 characters marking the end of
 		// it
@@ -215,7 +223,7 @@ public class CryptoPrimitivesAndroid {
  
 		IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
 		SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
-		Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding", "BC");
+		Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding", "SC");
 		cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec);
 		ByteArrayInputStream bIn = new ByteArrayInputStream(input);
 		CipherInputStream cIn = new CipherInputStream(bIn, cipher);
@@ -241,7 +249,7 @@ public class CryptoPrimitivesAndroid {
 	public static byte[] decryptAES_CTR_String(byte[] input, byte[] keyBytes)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
 			NoSuchProviderException, NoSuchPaddingException, IOException {
-		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+		//Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
 		byte[] ivBytes = new byte[16];
 
@@ -252,7 +260,7 @@ public class CryptoPrimitivesAndroid {
 
 		IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
 		SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
-		Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding", "BC");
+		Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding","SC");
 
 		// Initalization of the Cipher
 		cipher.init(Cipher.DECRYPT_MODE, key, ivSpec);
@@ -276,7 +284,7 @@ public class CryptoPrimitivesAndroid {
 	public static byte[] DTE_encryptAES_CTR_String(byte[] encKeyBytes, byte[] PRFKeyBytes, String identifier,
 			int sizeOfFileName) throws InvalidKeyException, InvalidAlgorithmParameterException,
 			NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException {
-		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+		//Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
 		// Title Encoding: Concatenate the title with the text. The title should
 		// be at most "sizeOfFileName" characters including 3 characters marking
@@ -290,7 +298,7 @@ public class CryptoPrimitivesAndroid {
 
 		IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
 		SecretKeySpec key = new SecretKeySpec(encKeyBytes, "AES");
-		Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding", "BC");
+		Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding","SC");
 		cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec);
 		ByteArrayInputStream bIn = new ByteArrayInputStream(input);
 		CipherInputStream cIn = new CipherInputStream(bIn, cipher);

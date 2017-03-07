@@ -5,10 +5,7 @@
 
 
 import java.io.*;
-import java.security.Provider;
-import java.security.Security;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 
@@ -89,12 +86,12 @@ public class TestLocalDynRHAndroid {
 
 				System.out.println(DynRHAndroid.resolve(sk, DynRHAndroid.query(token, emm), keyword));
 
-				System.out.println("Enter index of the identifier that you want to delete:");
-				String index = keyRead.readLine();
-				List<Integer> deletions = new ArrayList<Integer>();
-				deletions.add(Integer.parseInt(index));
-				byte[] delToken = DynRHAndroid.delToken(sk, keyword);
-				DynRHAndroid.delete(delToken, deletions, emm);
+//				System.out.println("Enter index of the identifier that you want to delete:");
+//				String index = keyRead.readLine();
+//				List<Integer> deletions = new ArrayList<Integer>();
+//				deletions.add(Integer.parseInt(index));
+//				byte[] delToken = DynRHAndroid.delToken(sk, keyword);
+//				DynRHAndroid.delete(delToken, deletions, emm);
 
 			}
 		}
