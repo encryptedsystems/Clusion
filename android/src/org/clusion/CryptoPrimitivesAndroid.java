@@ -14,6 +14,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+package org.clusion;
+
 
 import org.spongycastle.crypto.digests.SHA256Digest;
 import org.spongycastle.crypto.digests.SHA512Digest;
@@ -33,13 +35,10 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Arrays;
 
-import android.util.Log;
-
 @SuppressWarnings("restriction")
 public class CryptoPrimitivesAndroid {
 
     static {
-        Log.i("sse", "insert provider");
         Security.addProvider(new org.spongycastle.jce.provider.BouncyCastleProvider());
     }
 
