@@ -1,0 +1,51 @@
+apply plugin: 'java'
+
+repositories {
+  mavenCentral()
+}
+
+configurations {
+  provided
+  compile.extendsFrom provided
+}
+
+
+dependencies {
+  provided 'com.madgag.spongycastle:prov:1.51.0.0'
+  compile 'com.google.guava:guava:19.0'
+}
+
+sourceSets {
+  main {
+    java.srcDirs = ['src']
+  }
+  test {
+    java.srcDirs = ['test']
+  }
+}
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+version = 1.0
+jar {
+  dependsOn configurations.runtime
+  from {
+    (configurations.runtime - configurations.provided).collect { 
+      it.isDirectory() ? it : zipTree(it)
+    }
+  } {
+    exclude "META-INF/*.SF"
+    exclude "META-INF/*.DSA"
+    exclude "META-INF/*.RSA"
+  }
+  manifest {
+    attributes 'Implementation-Title': 'Clusion Android',
+               'Implementation-Version': version
+  }
+  baseName = 'clusion-android'
+  version = version
+}
+
+test {
+    systemProperties 'property': 'value'
+}
