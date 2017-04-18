@@ -43,6 +43,10 @@ import java.util.Arrays;
 
 public class CryptoPrimitives {
 
+	static {
+		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+	}
+
 	private CryptoPrimitives() {
 	}
 
@@ -213,7 +217,6 @@ public class CryptoPrimitives {
 	public static byte[] encryptAES_CTR_String(byte[] keyBytes, byte[] ivBytes, String identifier, int sizeOfFileName)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
 			NoSuchProviderException, NoSuchPaddingException, IOException {
-		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
 		// Concatenate the title with the text. The title should be at most
 		// "sizeOfFileName" characters including 3 characters marking the end of
@@ -241,6 +244,71 @@ public class CryptoPrimitives {
 
 	// ***********************************************************************************************//
 
+	///////////////////// AES-CBC encryption with no padding
+	///////////////////// /////////////////////////////
+
+	// ***********************************************************************************************//
+
+	public static byte[] encryptAES_CBC(byte[] keyBytes, byte[] ivBytes, String identifier)
+			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
+			NoSuchProviderException, NoSuchPaddingException, IOException {
+
+		byte[] input = identifier.getBytes("UTF-8");
+
+		IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
+		SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
+		Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding", "BC");
+		cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec);
+		ByteArrayInputStream bIn = new ByteArrayInputStream(input);
+		CipherInputStream cIn = new CipherInputStream(bIn, cipher);
+		ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+
+		int ch;
+		while ((ch = cIn.read()) >= 0) {
+			bOut.write(ch);
+		}
+		byte[] cipherText = concat(ivBytes, bOut.toByteArray());
+
+		return cipherText;
+
+	}
+
+	// ***********************************************************************************************//
+
+	///////////////////// AES-CBC Decryption
+	///////////////////// /////////////////////////////
+
+	// ***********************************************************************************************//
+
+	public static byte[] decryptAES_CBC(byte[] input, byte[] keyBytes)
+			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
+			NoSuchProviderException, NoSuchPaddingException, IOException {
+
+		byte[] ivBytes = new byte[16];
+
+		byte[] cipherText = new byte[input.length - 16];
+
+		System.arraycopy(input, 0, ivBytes, 0, ivBytes.length);
+		System.arraycopy(input, ivBytes.length, cipherText, 0, cipherText.length);
+
+		IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
+		SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
+		Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding", "BC");
+
+		// Initalization of the Cipher
+		cipher.init(Cipher.DECRYPT_MODE, key, ivSpec);
+
+		ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+		CipherOutputStream cOut = new CipherOutputStream(bOut, cipher);
+
+		cOut.write(cipherText);
+		cOut.close();
+
+		return bOut.toByteArray();
+	}
+
+	// ***********************************************************************************************//
+
 	///////////////////// AES-CTR Decryption of String
 	///////////////////// /////////////////////////////
 
@@ -249,7 +317,6 @@ public class CryptoPrimitives {
 	public static byte[] decryptAES_CTR_String(byte[] input, byte[] keyBytes)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
 			NoSuchProviderException, NoSuchPaddingException, IOException {
-		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
 		byte[] ivBytes = new byte[16];
 
@@ -284,7 +351,6 @@ public class CryptoPrimitives {
 	public static byte[] DTE_encryptAES_CTR_String(byte[] encKeyBytes, byte[] PRFKeyBytes, String identifier,
 			int sizeOfFileName) throws InvalidKeyException, InvalidAlgorithmParameterException,
 			NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, IOException {
-		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
 		// Title Encoding: Concatenate the title with the text. The title should
 		// be at most "sizeOfFileName" characters including 3 characters marking
@@ -326,7 +392,6 @@ public class CryptoPrimitives {
 			String folderInput, String inputFileName, byte[] keyBytes, byte[] ivBytes)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
 			NoSuchProviderException, NoSuchPaddingException, IOException {
-		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 		byte[] input0 = readAlternateImpl(folderInput + inputFileName);
 
 		// Concatenate the title with the text. The title should be at most 42
@@ -373,7 +438,6 @@ public class CryptoPrimitives {
 			String inputFileName, byte[] keyBytes, byte[] ivBytes)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
 			NoSuchProviderException, NoSuchPaddingException, IOException {
-		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 		byte[] input0 = readAlternateImpl(folderInput + inputFileName);
 
 		// Concatenate the title with the text. The title should be at most 42
@@ -413,7 +477,6 @@ public class CryptoPrimitives {
 	public static void decryptAES_CTR(String folderOUT, byte[] input, byte[] keyBytes)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
 			NoSuchProviderException, NoSuchPaddingException, IOException {
-		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
 		byte[] ivBytes = new byte[16];
 		byte[] cipherText = new byte[input.length - 16];
@@ -457,8 +520,6 @@ public class CryptoPrimitives {
 
 	public static boolean[][] onlineCipher(byte[] keyHash, byte[] keyEnc, boolean[] plaintext) throws IOException,
 			InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException {
-
-		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
 		// Block extension using Block expansion function
 		int blockSize = 128;
