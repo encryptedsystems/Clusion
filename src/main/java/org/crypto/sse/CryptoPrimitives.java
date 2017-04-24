@@ -261,7 +261,7 @@ public class CryptoPrimitives {
 
 		IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
 		SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
-		Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding", "BC");
+		Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding", "BC");
 		cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec);
 		ByteArrayInputStream bIn = new ByteArrayInputStream(input);
 		CipherInputStream cIn = new CipherInputStream(bIn, cipher);
@@ -296,7 +296,7 @@ public class CryptoPrimitives {
 
 		IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
 		SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
-		Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding", "BC");
+		Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding", "BC");
 
 		// Initalization of the Cipher
 		cipher.init(Cipher.DECRYPT_MODE, key, ivSpec);
