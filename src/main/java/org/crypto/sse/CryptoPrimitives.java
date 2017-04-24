@@ -249,11 +249,15 @@ public class CryptoPrimitives {
 
 	// ***********************************************************************************************//
 
-	public static byte[] encryptAES_CBC(byte[] keyBytes, byte[] ivBytes, String identifier)
+	public static byte[] encryptAES_CBC_String(byte[] keyBytes, byte[] ivBytes, String identifier)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
 			NoSuchProviderException, NoSuchPaddingException, IOException {
+	    return encryptAES_CBC(keyBytes, ivBytes, identifier.getBytes("UTF-8"));
+	}
 
-		byte[] input = identifier.getBytes("UTF-8");
+	public static byte[] encryptAES_CBC(byte[] keyBytes, byte[] ivBytes, byte[] input)
+			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
+			NoSuchProviderException, NoSuchPaddingException, IOException {
 
 		IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
 		SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
@@ -270,7 +274,6 @@ public class CryptoPrimitives {
 		byte[] cipherText = concat(ivBytes, bOut.toByteArray());
 
 		return cipherText;
-
 	}
 
 	// ***********************************************************************************************//
