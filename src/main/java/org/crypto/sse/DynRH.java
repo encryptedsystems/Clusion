@@ -31,10 +31,10 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import javax.crypto.NoSuchPaddingException;
 
@@ -61,10 +61,9 @@ public class DynRH {
 
 	public static HashMap<String, byte[]> setup() {
 
-		System.out.println("Initialization of the Updated Encrypted Dictionary\n");
+		System.out.println("Initialization of the Encrypted Dictionary\n");
 
 		HashMap<String, byte[]> dictionaryUpdates = new HashMap<String, byte[]>();
-
 		return dictionaryUpdates;
 	}
 
@@ -75,20 +74,22 @@ public class DynRH {
 		// We use a lexicographic sorted list such that the server
 		// will not know any information of the inserted elements creation order
 		TreeMultimap<String, byte[]> tokenUp = TreeMultimap.create(Ordering.natural(), Ordering.usingToString());
-
 		// Key generation
+
+		SecureRandom random = new SecureRandom();
+		random.setSeed(CryptoPrimitives.randomSeed(16));
+		byte[] iv = new byte[16];
+
 		for (String word : lookup.keySet()) {
 
+			byte[] key1 = CryptoPrimitives.generateCmac(key, 1 + new String());
+
 			byte[] key2 = CryptoPrimitives.generateCmac(key, 2 + word);
-			// generate keys for response-hiding construction for SIV (Synthetic
-			// IV)
-			byte[] key3 = CryptoPrimitives.generateCmac(key, 3 + new String());
-
-			byte[] key4 = CryptoPrimitives.generateCmac(key, 4 + word);
-
-			byte[] key5 = CryptoPrimitives.generateCmac(key, 5 + word);
 
 			for (String id : lookup.get(word)) {
+
+				random.nextBytes(iv);
+
 				int counter = 0;
 
 				if (state.get(word) != null) {
@@ -97,13 +98,10 @@ public class DynRH {
 
 				state.put(word, counter + 1);
 
-				byte[] l = CryptoPrimitives.generateCmac(key5, "" + counter);
+				byte[] l = CryptoPrimitives.generateCmac(key2, "" + counter);
 
-				String value = new String(CryptoPrimitives.DTE_encryptAES_CTR_String(key3, key4, id, 20), "ISO-8859-1");
-
-				tokenUp.put(new String(l), CryptoPrimitives.encryptAES_CTR_String(key2,
-						CryptoPrimitives.randomBytes(16), value, sizeOfFileIdentifer));
-
+				byte[] value = CryptoPrimitives.encryptAES_CTR_String(key1, iv, id, sizeOfFileIdentifer);
+				tokenUp.put(new String(l), value);
 			}
 
 		}
@@ -133,7 +131,7 @@ public class DynRH {
 	public static byte[][] genToken(byte[] key, String word) throws UnsupportedEncodingException {
 
 		byte[][] keys = new byte[2][];
-		keys[0] = CryptoPrimitives.generateCmac(key, 5 + word);
+		keys[0] = CryptoPrimitives.generateCmac(key, 2 + word);
 		if (state.get(word) != null) {
 			keys[1] = ByteBuffer.allocate(4).putInt(state.get(word)).array();
 		} else {
@@ -149,17 +147,15 @@ public class DynRH {
 
 	// ***********************************************************************************************//
 
-	public static List<byte[]> query(byte[][] keys, HashMap<String, byte[]> dictionaryUpdates)
+	public static List<byte[]> query(byte[][] token, HashMap<String, byte[]> dictionaryUpdates)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
 			NoSuchProviderException, NoSuchPaddingException, IOException {
 
 		List<byte[]> result = new ArrayList<byte[]>();
 		positions = new ArrayList<Integer>();
-		for (int i = 0; i < ByteBuffer.wrap(keys[1]).getInt(); i++) {
-			if (dictionaryUpdates.get(new String(CryptoPrimitives.generateCmac(keys[0], "" + i))) != null) {
-				byte[] temp = dictionaryUpdates.get(new String(CryptoPrimitives.generateCmac(keys[0], "" + i)));
-				// The "positions" list will only contain the counters for which
-				// a value exists
+		for (int i = 0; i < ByteBuffer.wrap(token[1]).getInt(); i++) {
+			if (dictionaryUpdates.get(new String(CryptoPrimitives.generateCmac(token[0], "" + i))) != null) {
+				byte[] temp = dictionaryUpdates.get(new String(CryptoPrimitives.generateCmac(token[0], "" + i)));
 				positions.add(i);
 				result.add(temp);
 			}
@@ -176,7 +172,7 @@ public class DynRH {
 
 	public static byte[] delToken(byte[] key, String word) throws UnsupportedEncodingException {
 
-		byte[] key1 = CryptoPrimitives.generateCmac(key, 5 + word);
+		byte[] key1 = CryptoPrimitives.generateCmac(key, 2 + word);
 		return key1;
 	}
 
@@ -186,12 +182,12 @@ public class DynRH {
 
 	// ***********************************************************************************************//
 
-	public static void delete(byte[] key, List<Integer> indices, HashMap<String, byte[]> dictionaryUpdates)
+	public static void delete(byte[] deltoken, List<Integer> indices, HashMap<String, byte[]> dictionaryUpdates)
 			throws UnsupportedEncodingException {
 
 		// The indices selected by the client follows the order in the list
 		for (Integer id : indices) {
-			dictionaryUpdates.remove(new String(CryptoPrimitives.generateCmac(key, "" + positions.get(id))));
+			dictionaryUpdates.remove(new String(CryptoPrimitives.generateCmac(deltoken, "" + positions.get(id))));
 		}
 	}
 
@@ -201,20 +197,16 @@ public class DynRH {
 
 	// ***********************************************************************************************//
 
-	public static List<String> resolve(byte[] key, List<byte[]> list, String keyword)
+	public static List<String> resolve(byte[] key, List<byte[]> list)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
 			NoSuchProviderException, NoSuchPaddingException, IOException {
 
-		byte[] key2 = CryptoPrimitives.generateCmac(key, 2 + keyword);
-		byte[] key3 = CryptoPrimitives.generateCmac(key, 3 + new String());
+		byte[] key2 = CryptoPrimitives.generateCmac(key, 1 + new String());
 		List<String> result = new ArrayList<String>();
 
 		for (byte[] ct : list) {
 			String decr = new String(CryptoPrimitives.decryptAES_CTR_String(ct, key2)).split("\t\t\t")[0];
-
-			byte[] id2 = decr.getBytes("ISO-8859-1");
-
-			result.add(new String(CryptoPrimitives.decryptAES_CTR_String(id2, key3)).split("\t\t\t")[0]);
+			result.add(decr);
 		}
 
 		return result;
@@ -238,7 +230,7 @@ public class DynRH {
 		}
 
 		byte[][] keys = new byte[counter][];
-		byte[] temp = CryptoPrimitives.generateCmac(key, 5 + word);
+		byte[] temp = CryptoPrimitives.generateCmac(key, 2 + word);
 
 		for (int i = 0; i < counter; i++) {
 			keys[i] = CryptoPrimitives.generateCmac(temp, "" + i);
@@ -258,6 +250,7 @@ public class DynRH {
 			NoSuchProviderException, NoSuchPaddingException, IOException {
 
 		List<byte[]> result = new ArrayList<byte[]>();
+		positions = new ArrayList<Integer>();
 
 		for (int i = 0; i < keys.length; i++) {
 
@@ -283,7 +276,7 @@ public class DynRH {
 			throws UnsupportedEncodingException {
 
 		byte[][] keys = new byte[indices.size()][];
-		byte[] temp = CryptoPrimitives.generateCmac(key, 5 + word);
+		byte[] temp = CryptoPrimitives.generateCmac(key, 2 + word);
 
 		for (int i = 0; i < indices.size(); i++) {
 			keys[i] = CryptoPrimitives.generateCmac(temp, "" + positions.get(indices.get(i)));
