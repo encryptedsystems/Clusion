@@ -41,8 +41,6 @@ public class TestLocalDynRH2Lev {
 		// Construction of the global multi-map
 		System.out.println("\nBeginning of Encrypted Multi-map creation \n");
 
-		RH2Lev.master = sk;
-
 		DynRH2Lev twolev = DynRH2Lev.constructEMMParGMM(sk, TextExtractPar.lp1, bigBlock, smallBlock, dataSize);
 
 		// Empty the previous multimap

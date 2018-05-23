@@ -185,7 +185,7 @@ public class IEXRH2Lev implements Serializable {
 			}
 
 			// Filter setting optional. For a setup without any filtering set
-			// filterParameter to 1
+			// filterParameter to 0
 			if (((double) lookup.get(keyword).size() / TextExtractPar.maxTupleSize > filterParameter)) {
 
 				// Stats
@@ -215,7 +215,7 @@ public class IEXRH2Lev implements Serializable {
 				// between "keyword" and "word"
 				for (String word : VW) {
 					// Filter setting optional. For a setup without any
-					// filtering set filterParameter to 1
+					// filtering set filterParameter to 0
 					if (((double) lookup.get(word).size() / TextExtractPar.maxTupleSize > filterParameter)) {
 						Collection<String> l1 = new ArrayList<String>(lookup.get(word));
 						Collection<String> l2 = new ArrayList<String>(lookup.get(keyword));
@@ -228,8 +228,8 @@ public class IEXRH2Lev implements Serializable {
 				RH2Lev.counter = 0;
 
 				// dataSize = (int) filterParameter;
-				RH2Lev.eval = 4 + keyword;
-				RH2Lev.lmm = true;
+				EMM2Lev.eval = 4 + keyword;
+				EMM2Lev.lmm = true;
 
 				disj2.getLocalMultiMap()[counter] = RH2Lev.constructEMMParGMM(
 						CryptoPrimitives.generateCmac(keys.get(0), keyword), secondaryLookup, bigBlock, smallBlock,

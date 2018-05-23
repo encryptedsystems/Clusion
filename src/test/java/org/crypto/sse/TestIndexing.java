@@ -42,7 +42,7 @@ public class TestIndexing {
 		TextProc.TextProc(false, pathName);
 
 		System.out.println("\nFirst mult-map " + TextExtractPar.lp1);
-		System.out.println("Second multi-map " + TextExtractPar.lp1);
+		System.out.println("Second multi-map " + TextExtractPar.lp2);
 
 	}
 

@@ -70,7 +70,7 @@ public class TextExtractPar implements Serializable {
 	public static int maxTupleSize = 0;
 	public static int threshold = 100;
 
-	// lookup stores a plaintext inverted index of the dataset, i.e., the
+	// lookup1 stores a plaintext inverted index of the dataset, i.e., the
 	// association between the keyword and documents that contain the keyword
 
 	Multimap<String, String> lookup1 = ArrayListMultimap.create();
@@ -149,6 +149,9 @@ public class TextExtractPar implements Serializable {
 
 			for (String key : keywordSet1) {
 				lp1.putAll(key, future.get().getL1().get(key));
+				if (lp1.get(key).size()>maxTupleSize){
+					maxTupleSize= lp1.get(key).size();
+				}
 			}
 			for (String key : keywordSet2) {
 				lp2.putAll(key, future.get().getL2().get(key));
@@ -357,8 +360,21 @@ public class TextExtractPar implements Serializable {
 				// words such as "the, a, etc"
 
 				Analyzer analyzer = new StandardAnalyzer(noise);
-				List<String> token = Tokenizer.tokenizeString(analyzer, lines.get(i));
+				List<String> token0 = Tokenizer.tokenizeString(analyzer, lines.get(i));
+				List<String> token = new ArrayList<String>();
+				//removing numbers/1-letter keywords
+				for (int j=0; j<token0.size();j++){
+					if ((!token0.get(j).matches(".*\\d+.*")
+							&&
+							(token0.get(j)).length() >1)){
+						token.add(token0.get(j));
+					}
+				}
+				
 				temporaryCounter = temporaryCounter + token.size();
+				
+				
+
 				for (int j = 0; j < token.size(); j++) {
 
 					// Avoid counting occurrences of words in the same file

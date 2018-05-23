@@ -123,7 +123,6 @@ public class IEX2Lev implements Serializable {
 		BufferedWriter writer = new BufferedWriter(new FileWriter("logs.txt", true));
 
 		writer.write("\n *********************Stats******* \n");
-
 		writer.write("\n Number of (w, id) pairs " + lookup2.size());
 		writer.write("\n Number of keywords " + lookup.keySet().size());
 
@@ -185,7 +184,7 @@ public class IEX2Lev implements Serializable {
 			}
 
 			// Filter setting optional. For a setup without any filtering set
-			// filterParameter to 1
+			// filterParameter to 0
 			if (((double) lookup.get(keyword).size() / TextExtractPar.maxTupleSize > filterParameter)) {
 
 				// Stats
@@ -215,7 +214,7 @@ public class IEX2Lev implements Serializable {
 				// between "keyword" and "word"
 				for (String word : VW) {
 					// Filter setting optional. For a setup without any
-					// filtering set filterParameter to 1
+					// filtering set filterParameter to 0
 					if (((double) lookup.get(word).size() / TextExtractPar.maxTupleSize > filterParameter)) {
 						Collection<String> l1 = new ArrayList<String>(lookup.get(word));
 						Collection<String> l2 = new ArrayList<String>(lookup.get(keyword));

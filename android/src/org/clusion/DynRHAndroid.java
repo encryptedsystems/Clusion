@@ -14,7 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.clusion;
+package src.org.clusion;
 
 
 import java.io.File;

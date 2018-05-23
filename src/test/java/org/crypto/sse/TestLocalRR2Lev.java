@@ -53,9 +53,18 @@ public class TestLocalRR2Lev {
 
 		// Construction of the global multi-map
 		System.out.println("\nBeginning of Encrypted Multi-map creation \n");
-
+		System.out.println("Number of keywords "+TextExtractPar.lp1.keySet().size());
+		System.out.println("Number of pairs "+	TextExtractPar.lp1.keys().size());
+		//start
+        long startTime = System.nanoTime();
 		RR2Lev twolev = RR2Lev.constructEMMParGMM(listSK.get(0), TextExtractPar.lp1, bigBlock, smallBlock, dataSize);
+		//end
+        long endTime = System.nanoTime();
 
+		//time elapsed
+        long output = endTime - startTime;
+        System.out.println("Elapsed time in seconds: " + output / 1000000000);	
+        
 		while (true) {
 
 			System.out.println("Enter the keyword to search for:");
