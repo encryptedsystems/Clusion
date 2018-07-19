@@ -39,6 +39,8 @@ public class TestLocalIEX2Lev {
 
 	public static void main(String[] args) throws Exception {
 
+		Printer.addPrinter(new Printer(Printer.LEVEL.EXTRA));
+
 		BufferedReader keyRead = new BufferedReader(new InputStreamReader(System.in));
 
 		System.out.println("Enter your password :");
@@ -77,33 +79,33 @@ public class TestLocalIEX2Lev {
 
 		// Writing logs
 
-		System.out.println("\n*****************************************************************");
-		System.out.println("\n\t\tSTATS");
-		System.out.println("\n*****************************************************************");
+		Printer.debugln("\n*****************************************************************");
+		Printer.debugln("\n\t\tSTATS");
+		Printer.debugln("\n*****************************************************************");
 
-		// System.out.println("\nNumber of keywords
+		// Printer.debugln("\nNumber of keywords
 		// "+TextExtractPar.totalNumberKeywords);
-		System.out.println("\nNumber of (w, id) pairs " + TextExtractPar.lp2.size());
+		Printer.debugln("\nNumber of (w, id) pairs " + TextExtractPar.lp2.size());
 		writer.write("\n Number of (w, id) pairs " + TextExtractPar.lp2.size());
 
-		System.out.println("\nTotal number of stored (w, Id) including in local MM : " + IEX2Lev.numberPairs);
+		Printer.debugln("\nTotal number of stored (w, Id) including in local MM : " + IEX2Lev.numberPairs);
 		writer.write("\n Total number of stored (w, Id) including in local MM : " + IEX2Lev.numberPairs);
 
-		System.out.println("\nTime elapsed per (w, Id) in ns: " + totalTime2 / IEX2Lev.numberPairs);
+		Printer.debugln("\nTime elapsed per (w, Id) in ns: " + totalTime2 / IEX2Lev.numberPairs);
 		writer.write("\n Time elapsed per (w, Id) in ns: " + totalTime2 / IEX2Lev.numberPairs);
 
-		System.out.println("\nTotal Time elapsed for the entire construction in seconds: " + totalTime2 / 1000000000);
+		Printer.debugln("\nTotal Time elapsed for the entire construction in seconds: " + totalTime2 / 1000000000);
 		writer.write("\n Total Time elapsed for the entire construction in seconds: " + totalTime2 / 1000000000);
 
-		System.out.println("\nRelative Time elapsed per (w, Id) in ns: " + totalTime2 / TextExtractPar.lp1.size());
+		Printer.debugln("\nRelative Time elapsed per (w, Id) in ns: " + totalTime2 / TextExtractPar.lp1.size());
 		writer.write("\n Relative Time elapsed per (w, Id) in ns: " + totalTime2 / TextExtractPar.lp1.size());
 
 		// The two commented commands are used to compute the size of the
 		// encrypted Local multi-maps and global multi-maps
 
-		// System.out.println("\nSize of the Structure LMM: "+
+		// Printer.debugln("\nSize of the Structure LMM: "+
 		// SizeOf.humanReadable(SizeOf.deepSizeOf(disj.getLocalMultiMap())));
-		// System.out.println("\nSize of the Structure MMg: "+
+		// Printer.debugln("\nSize of the Structure MMg: "+
 		// SizeOf.humanReadable(SizeOf.deepSizeOf(disj.getGlobalMM())));
 		writer.close();
 
@@ -143,11 +145,11 @@ public class TestLocalIEX2Lev {
 
 			long startTime3 = System.nanoTime();
 
-			// System.out.println(searchBol);
+			// Printer.debugln(searchBol);
 
 			Set<String> tmpBol = IEX2Lev.query(IEX2Lev.token(listSK, searchBol), disj);
 
-			// System.out.println(tmpBol);
+			// Printer.debugln(tmpBol);
 
 			for (int i = 1; i < bool.length; i++) {
 				Set<String> finalResult = new HashSet<String>();

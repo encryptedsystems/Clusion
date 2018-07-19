@@ -32,7 +32,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -71,7 +70,7 @@ public class DynRH2Lev extends RH2Lev {
 
 		RH2Lev result = constructEMMPar(key, lookup, bigBlock, smallBlock, dataSize);
 
-		System.out.println("Initialization of the Encrypted Dictionary that will handle the updates:\n");
+		Printer.debugln("Initialization of the Encrypted Dictionary that will handle the updates:\n");
 
 		HashMap<String, byte[]> dictionaryUpdates = new HashMap<String, byte[]>();
 

@@ -10,12 +10,13 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
 
 public class TestLocalDynRH {
 
 	public static void main(String[] args) throws Exception {
+		
+		Printer.addPrinter(new Printer(Printer.LEVEL.EXTRA));
 
 		BufferedReader keyRead = new BufferedReader(new InputStreamReader(System.in));
 

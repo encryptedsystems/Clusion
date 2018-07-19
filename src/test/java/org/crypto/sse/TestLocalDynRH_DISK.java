@@ -28,6 +28,8 @@ public class TestLocalDynRH_DISK {
 	static int counter = 0;
 
 	public static void main(String[] args) throws Exception {
+		
+		Printer.addPrinter(new Printer(Printer.LEVEL.EXTRA));
 
 		BufferedReader keyRead = new BufferedReader(new InputStreamReader(System.in));
 

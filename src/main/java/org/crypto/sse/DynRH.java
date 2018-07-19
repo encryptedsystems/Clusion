@@ -61,7 +61,7 @@ public class DynRH {
 
 	public static HashMap<String, byte[]> setup() {
 
-		System.out.println("Initialization of the Encrypted Dictionary\n");
+		Printer.debugln("Initialization of the Encrypted Dictionary\n");
 
 		HashMap<String, byte[]> dictionaryUpdates = new HashMap<String, byte[]>();
 		return dictionaryUpdates;

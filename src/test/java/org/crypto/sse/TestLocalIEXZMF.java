@@ -47,28 +47,30 @@ public class TestLocalIEXZMF {
 	private static final int maxLengthOfMask = 20;
 
 	public static void main(String[] args) throws Exception {
+		
+		Printer.addPrinter(new Printer(Printer.LEVEL.EXTRA));
 
 		BufferedReader keyRead = new BufferedReader(new InputStreamReader(System.in));
 
-		System.out.println("Enter your password :");
+		Printer.normalln("Enter your password :");
 
 		String pass = keyRead.readLine();
 
 		List<byte[]> listSK = IEXZMF.keyGen(128, pass, "salt/salt", 100);
 
 		long startTime = System.nanoTime();
-
-		System.out.println("Enter the relative path name of the folder that contains the files to make searchable");
+		
+		Printer.normalln("Enter the relative path name of the folder that contains the files to make searchable");
 
 		String pathName = keyRead.readLine();
 
 		TextProc.TextProc(false, pathName);
 
 		long startTime2 = System.nanoTime();
-		System.out.println("Number of keywords pairs (w. id): " + TextExtractPar.lp1.size());
-		System.out.println("Number of keywords " + TextExtractPar.lp1.keySet().size());
+		Printer.debugln("Number of keywords pairs (w. id): " + TextExtractPar.lp1.size());
+		Printer.debugln("Number of keywords " + TextExtractPar.lp1.keySet().size());
 
-		System.out.println("\n Beginning of global encrypted multi-map construction \n");
+		Printer.debugln("\n Beginning of global encrypted multi-map construction \n");
 
 		int bigBlock = 1000;
 		int smallBlock = 100;
@@ -90,39 +92,37 @@ public class TestLocalIEXZMF {
 				RR2Lev.constructEMMParGMM(listSK.get(1), TextExtractPar.lp1, bigBlock, smallBlock, dataSize),
 				localMultiMap, dictionaryForMM);
 
-		System.out.println("\n Beginning of local encrypted multi-map construction \n");
+		Printer.debugln("\n Beginning of local encrypted multi-map construction \n");
 
 		IEXZMF.constructMatryoshkaPar(new ArrayList(TextExtractPar.lp1.keySet()), listSK.get(0), listSK.get(1),
 				maxLengthOfMask, falsePosRate);
 
 		long endTime2 = System.nanoTime();
-
+		
 		long totalTime2 = endTime2 - startTime2;
+		Printer.statsln("\n*****************************************************************");
+		Printer.statsln("\n\t\tSTATS");
+		Printer.statsln("\n*****************************************************************");
 
-		System.out.println("\n*****************************************************************");
-		System.out.println("\n\t\tSTATS");
-		System.out.println("\n*****************************************************************");
-
-		System.out.println(
+		Printer.statsln(
 				"\nTotal Time elapsed for the local multi-map construction in seconds: " + totalTime2 / 1000000);
 
 		// Beginning of search phase
 
 		while (true) {
 
-			System.out.println("How many disjunctions? ");
+			Printer.normalln("How many disjunctions? ");
 			int numDisjunctions = Integer.parseInt(keyRead.readLine());
 
 			// Storing the CNF form
 			String[][] bool = new String[numDisjunctions][];
 			for (int i = 0; i < numDisjunctions; i++) {
-				System.out.println("Enter the keywords of the " + i + "th disjunctions ");
+				Printer.normalln("Enter the keywords of the " + i + "th disjunctions ");
 				bool[i] = keyRead.readLine().split(" ");
 			}
 
 			test("logZMF.txt", "Test", 1, disj, listSK, bool);
 		}
-
 	}
 
 	public static void test(String output, String word, int numberIterations, IEX2Lev disj, List<byte[]> listSK,
@@ -216,7 +216,7 @@ public class TestLocalIEXZMF {
 
 			}
 
-			System.out.println("Result " + tmpBol);
+			Printer.normalln("Result " + tmpBol);
 
 			long endTime3 = System.nanoTime();
 			long totalTime3 = endTime3 - startTime3;

@@ -28,16 +28,13 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
 import javax.crypto.NoSuchPaddingException;
-import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -201,7 +198,7 @@ public class EMM2Lev {
 			inputs.add(i, tmp);
 		}
 
-		System.out.println("End of Partitioning  \n");
+		Printer.debugln("End of Partitionning  \n");
 
 		List<Future<Multimap<String, byte[]>>> futures = new ArrayList<Future<Multimap<String, byte[]>>>();
 		for (final String[] input : inputs) {
@@ -249,7 +246,7 @@ public class EMM2Lev {
 
 			counter++;
 			if (((float) counter / 10000) == (int) (counter / 10000)) {
-				System.out.println("Number of processed keywords " + counter);
+				Printer.statsln("Number of processed keywords " + counter);
 			}
 
 			// generate the tag

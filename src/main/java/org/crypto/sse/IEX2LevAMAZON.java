@@ -328,7 +328,7 @@ public class IEX2LevAMAZON {
 			Set<String> VW = new TreeSet<String>();
 			for (String idDoc : lookup.get(token[0])) {
 				VW.addAll(lookup2.get(idDoc));
-				System.out.println("Document is: " + idDoc);
+				Printer.debugln("Document is: " + idDoc);
 
 			}
 
@@ -382,6 +382,8 @@ public class IEX2LevAMAZON {
 	 */
 	@SuppressWarnings("null")
 	public static void main(String[] args) throws Exception {
+		
+		Printer.addPrinter(new Printer(Printer.LEVEL.EXTRA));
 
 		// First Job
 		Configuration conf = new Configuration();
@@ -448,8 +450,8 @@ public class IEX2LevAMAZON {
 		String bucketName = "iexmaptest";
 
 		S3Object s3object = s3client.getObject(new GetObjectRequest(bucketName, args[4]));
-		System.out.println(s3object.getObjectMetadata().getContentType());
-		System.out.println(s3object.getObjectMetadata().getContentLength());
+		Printer.debugln(s3object.getObjectMetadata().getContentType());
+		Printer.debugln(""+s3object.getObjectMetadata().getContentLength());
 		List<String> lines = new ArrayList<String>();
 
 		String folderName = "2";
@@ -461,7 +463,7 @@ public class IEX2LevAMAZON {
 			// can copy the content locally as well
 			// using a buffered writer
 			lines.add(line);
-			System.out.println(line);
+			Printer.debugln(line);
 			// upload file to folder
 			String fileName = folderName + "/" + Integer.toString(counter);
 			ByteArrayInputStream input = new ByteArrayInputStream(line.getBytes());
@@ -481,8 +483,8 @@ public class IEX2LevAMAZON {
 		// Loading inverted index that associates files identifiers to keywords
 		lines = new ArrayList<String>();
 		s3object = s3client.getObject(new GetObjectRequest(bucketName, args[5]));
-		System.out.println(s3object.getObjectMetadata().getContentType());
-		System.out.println(s3object.getObjectMetadata().getContentLength());
+		Printer.debugln(s3object.getObjectMetadata().getContentType());
+		Printer.debugln(""+s3object.getObjectMetadata().getContentLength());
 
 		// Loading inverted index that associates keywords to identifiers
 
@@ -502,15 +504,15 @@ public class IEX2LevAMAZON {
 		try {
 			s3client.deleteObject(new DeleteObjectRequest(bucketName, args[4]));
 		} catch (AmazonServiceException ase) {
-			System.out.println("Caught an AmazonServiceException.");
-			System.out.println("Error Message:    " + ase.getMessage());
-			System.out.println("HTTP Status Code: " + ase.getStatusCode());
-			System.out.println("AWS Error Code:   " + ase.getErrorCode());
-			System.out.println("Error Type:       " + ase.getErrorType());
-			System.out.println("Request ID:       " + ase.getRequestId());
+			Printer.debugln("Caught an AmazonServiceException.");
+			Printer.debugln("Error Message:    " + ase.getMessage());
+			Printer.debugln("HTTP Status Code: " + ase.getStatusCode());
+			Printer.debugln("AWS Error Code:   " + ase.getErrorCode());
+			Printer.debugln("Error Type:       " + ase.getErrorType());
+			Printer.debugln("Request ID:       " + ase.getRequestId());
 		} catch (AmazonClientException ace) {
-			System.out.println("Caught an AmazonClientException.");
-			System.out.println("Error Message: " + ace.getMessage());
+			Printer.debugln("Caught an AmazonClientException.");
+			Printer.debugln("Error Message: " + ace.getMessage());
 		}
 
 		/*
