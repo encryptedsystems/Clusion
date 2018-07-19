@@ -36,7 +36,6 @@ import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -92,10 +91,10 @@ public class IEXZMF implements Serializable {
 
 		TextProc.TextProc(false, pwd);
 
-		System.out.println("\n Beginning of ZMF construction \n");
+		Printer.debugln("\n Beginning of ZMF construction \n");
 
-		System.out.println("Number of extracted keywords " + TextExtractPar.lp1.keySet().size());
-		System.out.println("Size of the inverted index (leakage N) " + TextExtractPar.lp1.size());
+		Printer.debugln("Number of extracted keywords " + TextExtractPar.lp1.keySet().size());
+		Printer.debugln("Size of the inverted index (leakage N) " + TextExtractPar.lp1.size());
 
 		constructMatryoshkaPar(new ArrayList(TextExtractPar.lp1.keySet()), listOfkeys.get(0), listOfkeys.get(1),
 				maxLengthOfMask, falsePosRate);
@@ -142,7 +141,7 @@ public class IEXZMF implements Serializable {
 			List<String> resultTMP = RR2Lev.query(token.get(i).getTokenMMGlobal(), disj.getGlobalMM().getDictionary(),
 					disj.getGlobalMM().getArray());
 
-			// System.out.println("Result of MM Global "+resultTMP);
+			// Printer.debugln("Result of MM Global "+resultTMP);
 
 			Map<String, boolean[]> listOfbloomFilter = new HashMap<String, boolean[]>();
 
@@ -151,7 +150,7 @@ public class IEXZMF implements Serializable {
 			bFIDPaddeds = bloomFilterStart.get(new String(token.get(i).getTokenSI1()));
 
 			if ((i < token.size() - 1) && !(bFIDPaddeds == null)) {
-				// System.out.println("bFIDPaddeds "+bFIDPaddeds);
+				// Printer.debugln("bFIDPaddeds "+bFIDPaddeds);
 
 				for (int j = 0; j < bFIDPaddeds.size(); j++) {
 
@@ -248,7 +247,7 @@ public class IEXZMF implements Serializable {
 			threads = Runtime.getRuntime().availableProcessors();
 		}
 
-		System.out.println("Number of threads " + threads);
+		Printer.extraln("Number of threads " + threads);
 
 		ExecutorService service = Executors.newFixedThreadPool(threads);
 
@@ -302,9 +301,9 @@ public class IEXZMF implements Serializable {
 
 		long endTime = System.nanoTime();
 		long totalTime = endTime - startTime;
-		System.out.println(
+		Printer.debugln(
 				"\nTime in (ns) for one Matryoshka filter in average: " + totalTime / TextExtractPar.lp1.size());
-		System.out.println("\nTime to construct local multi-maps in ms " + totalTime / 1000000);
+		Printer.debugln("\nTime to construct local multi-maps in ms " + totalTime / 1000000);
 
 	}
 
@@ -318,10 +317,10 @@ public class IEXZMF implements Serializable {
 			// First step of filtering where we reduce all BFs that do not
 			// verify the threshold
 
-			System.out.println("\n \n Number of keywords processed % "
+			Printer.debugln("\n \n Number of keywords processed % "
 					+ (numberOfkeywordsProcessed * 100) / TextExtractPar.lp1.keySet().size() + "\n");
 
-			System.out.println("keyword being processed to issue matryoshka filters: " + keyword);
+			Printer.debugln("keyword being processed to issue matryoshka filters: " + keyword);
 
 			Map<String, boolean[]> secureSetM2 = ZMF.setupSetMV2(keySM, keyword, TextExtractPar.lp2, TextExtractPar.lp1,
 					falsePosRate);
@@ -340,7 +339,7 @@ public class IEXZMF implements Serializable {
 
 				bloomFilterID.put(numberOfBF, id);
 
-				System.out.println("Matryoshka filter number: " + numberOfBF);
+				Printer.debugln("Matryoshka filter number: " + numberOfBF);
 				numberOfBF++;
 				counter++;
 

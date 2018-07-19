@@ -234,7 +234,7 @@ public class RR2Lev implements Serializable {
 			inputs.add(i, tmp);
 		}
 
-		System.out.println("End of Partitionning  \n");
+		Printer.debugln("End of Partitionning  \n");
 
 		List<Future<Multimap<String, byte[]>>> futures = new ArrayList<Future<Multimap<String, byte[]>>>();
 		for (final String[] input : inputs) {
@@ -283,7 +283,7 @@ public class RR2Lev implements Serializable {
 
 			counter++;
 			if (((float) counter / 10000) == (int) (counter / 10000)) {
-				System.out.println("Number of processed keywords " + counter);
+				Printer.debugln("Number of processed keywords " + counter);
 			}
 
 			// generate the tag
@@ -409,7 +409,7 @@ public class RR2Lev implements Serializable {
 		}
 		long endTime = System.nanoTime();
 		long totalTime = endTime - startTime;
-		// System.out.println("Time for one (w, id) "+totalTime/lookup.size());
+		// Printer.debugln("Time for one (w, id) "+totalTime/lookup.size());
 		return gamma;
 	}
 
