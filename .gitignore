@@ -30,5 +30,6 @@ words-logs.txt
 test.db
 data.txt
 output.txt
+dictionary.txt
 
 hs_err_pid*

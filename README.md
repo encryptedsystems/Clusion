@@ -123,6 +123,10 @@ For a quick test, create folder and store some input files, needed jars and test
 
 	run `java org.crypto.sse.IEX2LevAMAZON`
 
++ to test IEX-ZMF with Fuzzy search
+
+	run `java org.crypto.sse.TestLocalIEXZMF_Fuzzy`
+
 
 ## Documentation
 
@@ -137,6 +141,7 @@ use the library is to read through the source of the test code:
 + `org.crypto.sse.TestLocalIEX2Lev.java`
 + `org.crypto.sse.TestLocalIEXRH2Lev.java`
 + `org.crypto.sse.TestLocalIEXZMF.java`
++ `org.crypto.sse.TestLocalIEXZMF_Fuzzy.java`
 
 ## Requirements
 Clusion is written in Java.
