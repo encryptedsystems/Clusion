@@ -116,9 +116,9 @@ public class IEX2Lev implements Serializable {
 		RR2Lev[] localMultiMap = new RR2Lev[lookup.keySet().size()];
 		Multimap<String, Integer> dictionaryForMM = ArrayListMultimap.create();
 
-		System.out.println("Number of (w, id) pairs " + lookup.size());
+		Printer.debugln("Number of (w, id) pairs " + lookup.size());
 
-		System.out.println("Number of keywords " + lookup.keySet().size());
+		Printer.debugln("Number of keywords " + lookup.keySet().size());
 
 		BufferedWriter writer = new BufferedWriter(new FileWriter("logs.txt", true));
 
@@ -132,7 +132,7 @@ public class IEX2Lev implements Serializable {
 		///////////////////// size/////////////////////////////
 
 		HashMap<Integer, Integer> histogram = new HashMap<Integer, Integer>();
-		System.out.println("Number of documents " + lookup2.keySet().size());
+		Printer.debugln("Number of documents " + lookup2.keySet().size());
 		for (String keyword : lookup.keySet()) {
 			if (histogram.get(lookup.get(keyword).size()) != null) {
 				int tmp = histogram.get(lookup.get(keyword).size());
@@ -148,7 +148,7 @@ public class IEX2Lev implements Serializable {
 		}
 
 		// Construction of the global multi-map
-		System.out.println("\nBeginning of Global MM creation \n");
+		Printer.debugln("\nBeginning of Global MM creation \n");
 
 		long startTime1 = System.nanoTime();
 
@@ -164,7 +164,7 @@ public class IEX2Lev implements Serializable {
 
 		// Construction of the local multi-map
 
-		System.out.println("Start of Local Multi-Map construction");
+		Printer.debugln("Start of Local Multi-Map construction");
 
 		long startTime = System.nanoTime();
 
@@ -188,7 +188,7 @@ public class IEX2Lev implements Serializable {
 			if (((double) lookup.get(keyword).size() / TextExtractPar.maxTupleSize > filterParameter)) {
 
 				// Stats
-				System.out.println("Keyword in LMM " + keyword);
+				Printer.debugln("Keyword in LMM " + keyword);
 				BufferedWriter writer3 = new BufferedWriter(new FileWriter("words-logs.txt", true));
 				writer3.write("\n Keyword in LMM " + keyword);
 				writer3.close();
@@ -196,7 +196,7 @@ public class IEX2Lev implements Serializable {
 				for (int j = 0; j < 10; j++) {
 
 					if (counter == (int) ((j + 1) * lookup.keySet().size() / 10)) {
-						System.out.println("Number of total keywords processed equals " + j + "0 % \n");
+						Printer.statsln("Number of total keywords processed equals " + j + "0 % \n");
 						break;
 					}
 				}
@@ -240,7 +240,7 @@ public class IEX2Lev implements Serializable {
 
 		long endTime = System.nanoTime();
 
-		System.out.println("Time to construct LMM " + (endTime - startTime) / 1000000000);
+		Printer.statsln("Time to construct LMM " + (endTime - startTime) / 1000000000);
 
 		disj2.setDictionaryForMM(dictionaryForMM);
 		return disj2;

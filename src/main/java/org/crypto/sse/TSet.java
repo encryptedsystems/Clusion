@@ -134,7 +134,7 @@ public class TSet {
 
 				if (free.get(CryptoPrimitives.getIntFromByte(bucket, (int) (Math.log(bucketSize) / (Math.log(2)))))
 						.isEmpty()) {
-					System.out.println("Sub-Buckets are not big enough ==> re-do the process with a new key");
+					Printer.normalln("Sub-Buckets are not big enough ==> re-do the process with a new key");
 					System.exit(0);
 				}
 

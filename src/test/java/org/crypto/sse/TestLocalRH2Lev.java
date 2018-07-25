@@ -26,6 +26,8 @@ import java.util.ArrayList;
 public class TestLocalRH2Lev {
 
 	public static void main(String[] args) throws Exception {
+		
+		Printer.addPrinter(new Printer(Printer.LEVEL.EXTRA));
 
 		BufferedReader keyRead = new BufferedReader(new InputStreamReader(System.in));
 

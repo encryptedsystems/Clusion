@@ -252,6 +252,8 @@ public class CryptoPrimitives {
 		}
 		byte[] cipherText = concat(ivBytes, bOut.toByteArray());
 
+		cIn.close();
+		
 		return cipherText;
 
 	}
@@ -287,6 +289,8 @@ public class CryptoPrimitives {
 			bOut.write(ch);
 		}
 		byte[] cipherText = concat(ivBytes, bOut.toByteArray());
+		
+		cIn.close();
 
 		return cipherText;
 
@@ -395,6 +399,8 @@ public class CryptoPrimitives {
 			bOut.write(ch);
 		}
 		byte[] cipherText = concat(ivBytes, bOut.toByteArray());
+		
+		cIn.close();
 
 		return cipherText;
 
@@ -437,6 +443,8 @@ public class CryptoPrimitives {
 		}
 
 		byte[] cipherText = concat(ivBytes, bOut.toByteArray());
+		
+		cIn.close();
 
 		// Send the outputfile name
 		out.writeObject(outputFileName);
@@ -483,6 +491,8 @@ public class CryptoPrimitives {
 		}
 
 		byte[] cipherText = concat(ivBytes, bOut.toByteArray());
+		
+		cIn.close();
 
 		write(cipherText, outputFileName, folderName);
 
@@ -587,6 +597,8 @@ public class CryptoPrimitives {
 			}
 			results[i] = CryptoPrimitives.bytesToBoolean(bOut.toByteArray());
 			tmpResults1[i + 1] = results[i];
+			
+			cIn.close();
 
 		}
 
@@ -667,9 +679,9 @@ public class CryptoPrimitives {
 				output.close();
 			}
 		} catch (FileNotFoundException ex) {
-			System.out.println("File not found.");
+			Printer.normalln("File not found.");
 		} catch (IOException ex) {
-			System.out.println(ex);
+			Printer.debugln(""+ex);
 		}
 	}
 
@@ -681,7 +693,7 @@ public class CryptoPrimitives {
 			InputStream input = new BufferedInputStream(new FileInputStream(file));
 			result = readAndClose(input);
 		} catch (FileNotFoundException ex) {
-			System.out.println(ex);
+			Printer.debugln(""+ex);
 		}
 		return result;
 	}
@@ -705,7 +717,7 @@ public class CryptoPrimitives {
 				aInput.close();
 			}
 		} catch (IOException ex) {
-			System.out.println(ex);
+			Printer.debugln(""+ex);
 		}
 		return result.toByteArray();
 	}
