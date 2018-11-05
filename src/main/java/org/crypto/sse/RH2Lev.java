@@ -48,7 +48,8 @@ import java.util.concurrent.*;
 
 public class RH2Lev {
 
-	// define the number of characters that a file identifier can have
+	// define the number of characters that a file identifier can have. 
+	//Should be >= maximum size of file identifiers, or you might get a negative array exception from the encryption function
 	public static int sizeOfFileIdentifer = 100;
 	public static String separator = "seperator";
 
@@ -116,20 +117,19 @@ public class RH2Lev {
 				public void run() {
 
 					while (concurrentMap.keySet().size() > 0) {
-						Set<Integer> possibleValues = concurrentMap.keySet();
 
 						Random rand = new Random();
-
-						int temp = rand.nextInt(possibleValues.size());
-
-						List<Integer> listOfPossibleKeywords = new ArrayList<Integer>(possibleValues);
-
-						// set the input as randomly selected from the remaining
-						// possible keys
-						String[] input = { concurrentMap.get(listOfPossibleKeywords.get(temp)) };
-
-						// remove the key
-						concurrentMap.remove(listOfPossibleKeywords.get(temp));
+						String[] input = {""};
+						synchronized (concurrentMap) {
+							Set<Integer> possibleValues = concurrentMap.keySet();
+							int temp = rand.nextInt(possibleValues.size());
+							List<Integer> listOfPossibleKeywords = new ArrayList<Integer>(possibleValues);
+							// set the input as randomly selected from the remaining
+							// possible keys
+							input[0] = concurrentMap.get(listOfPossibleKeywords.get(temp)) ;
+							// remove the key
+							concurrentMap.remove(listOfPossibleKeywords.get(temp));
+						}
 
 						try {
 
@@ -197,7 +197,7 @@ public class RH2Lev {
 			inputs.add(i, tmp);
 		}
 
-		System.out.println("End of Partitionning  \n");
+		System.out.println("End of Partitioning  \n");
 
 		List<Future<Multimap<String, byte[]>>> futures = new ArrayList<Future<Multimap<String, byte[]>>>();
 		for (final String[] input : inputs) {
@@ -265,7 +265,7 @@ public class RH2Lev {
 
 			for (String id : lookup.get(word)) {
 				random.nextBytes(iv);
-				encryptedID.add(new String(CryptoPrimitives.encryptAES_CTR_String(key3, iv, id, 20), "ISO-8859-1"));
+				encryptedID.add(new String(CryptoPrimitives.encryptAES_CTR_String(key3, iv, id, sizeOfFileIdentifer), "ISO-8859-1"));
 			}
 
 			String encryptedIdString = "";

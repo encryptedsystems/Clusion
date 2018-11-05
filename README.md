@@ -113,7 +113,7 @@ For a quick test, create folder and store some input files, needed jars and test
 	
 + to test IEX-2Lev (response-hiding)
 
-	run `java org.crypto.sse.TestLocalIEXRH2Lev`
+	run `java org.crypto.sse.TestLocalIEXRH2Lev` 
 	
 + to test IEX-ZMF 
 

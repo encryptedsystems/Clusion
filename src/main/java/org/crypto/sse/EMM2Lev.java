@@ -201,7 +201,7 @@ public class EMM2Lev {
 			inputs.add(i, tmp);
 		}
 
-		System.out.println("End of Partitionning  \n");
+		System.out.println("End of Partitioning  \n");
 
 		List<Future<Multimap<String, byte[]>>> futures = new ArrayList<Future<Multimap<String, byte[]>>>();
 		for (final String[] input : inputs) {

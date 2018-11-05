@@ -38,7 +38,7 @@ public class TestLocalDynRH2Lev {
 		int smallBlock = 100;
 		int dataSize = 10000;
 
-		// Construction of the global multi-map
+		// // Construction of the global multi-map
 		System.out.println("\nBeginning of Encrypted Multi-map creation \n");
 
 		DynRH2Lev twolev = DynRH2Lev.constructEMMParGMM(sk, TextExtractPar.lp1, bigBlock, smallBlock, dataSize);
