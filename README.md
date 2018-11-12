@@ -178,7 +178,7 @@ Mennink, E. Tischhauser, and K. Yasuda. .
    Ciphers and the Hash-CBC Constructions* by M. Bellare, A. Boldyreva, L.
 Knudsen and C. Namprempre.
 
-6. \[[AKM19]](https://eprint.iacr.org/2018/195.pdf)\]: *Breach-Resistant Structured Encryption* by 
+6. \[[AKM19](https://eprint.iacr.org/2018/195.pdf)\]: *Breach-Resistant Structured Encryption* by 
 	G. Amjad, S. Kamara and T. Moataz.
 
 
@@ -187,4 +187,4 @@ Knudsen and C. Namprempre.
 [Goh03]: https://eprint.iacr.org/2003/216.pdf
 [ABLMTY13]: https://eprint.iacr.org/2013/790.pdf
 [BBKN07]: https://cseweb.ucsd.edu/~mihir/papers/olc.pdf
-[AKM19] : https://eprint.iacr.org/2018/195.pdf
+[AKM19]: https://eprint.iacr.org/2018/195.pdf
