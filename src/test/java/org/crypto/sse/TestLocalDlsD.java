@@ -9,6 +9,8 @@ public class TestLocalDlsD {
 	
 	 
 	public static void main(String[] args) throws Exception {
+		Printer.addPrinter(new Printer(Printer.LEVEL.EXTRA));
+		
 		BufferedReader keyRead = new BufferedReader(new InputStreamReader(System.in));
 		System.out.println("Enter your password :");
 		String pass = keyRead.readLine();

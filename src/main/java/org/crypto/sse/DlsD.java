@@ -183,8 +183,8 @@ public class DlsD {
 			}
 			inputs.add(i, tmp);
 		}
-		System.out.println("End of Partitionning  \n");
-
+		Printer.debugln("End of Partitionning  \n");
+		
 		List<Future<Integer>> futures = new ArrayList<Future<Integer>>();
 		for (final String[] input : inputs) {
 			Callable<Integer> callable = new Callable<Integer>() {
