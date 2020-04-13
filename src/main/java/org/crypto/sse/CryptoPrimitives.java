@@ -24,6 +24,7 @@
 
 package org.crypto.sse;
 
+import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.digests.SHA512Digest;
 import org.bouncycastle.crypto.engines.AESFastEngine;
@@ -176,6 +177,89 @@ public class CryptoPrimitives {
 
 	// ***********************************************************************************************//
 
+	///////////////////// OTP-like Encryption ///////////////////// /////////////////////////////
+
+	// ***********************************************************************************************//
+
+	public static byte[] OTPEnc(byte[] key, String plaintext) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
+			NoSuchProviderException, NoSuchPaddingException, IOException {
+
+		
+		int randomnessLength =  32;
+		// this is determined as well by the output length of the HMAC
+		int messageLength = 32;
+		
+		
+		byte[] randomness = randomBytes(32);
+		byte[] hmacOutput = generateHmac(key, randomness);
+		
+				
+		// transforming String to Bytes	
+		 byte [] plaintextInBytes = plaintext.getBytes("UTF-8");
+		
+		//XOR operation	
+		byte[] xorResult = new byte[32];
+		
+		int count  =0;
+		for (byte  b : hmacOutput) {
+			xorResult[count] = (byte) (b ^ plaintextInBytes[count]);
+			count++;
+		}
+
+        byte[] output = new byte[messageLength + randomnessLength];
+
+        System.arraycopy(xorResult, 0, output, 0, messageLength);
+        System.arraycopy(randomness, 0, output, messageLength, randomnessLength);
+
+		return output;
+	}
+
+	
+	
+	
+	// ***********************************************************************************************//
+
+	///////////////////// OTP-like Decryption ///////////////////// /////////////////////////////
+
+	// ***********************************************************************************************//
+
+	public static String OTPDec(byte[] key, byte[] ciphertext) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
+			NoSuchProviderException, NoSuchPaddingException, IOException {
+
+		
+		
+		int randomnessLength =  32;
+		
+		// this is determined as well by the output length of the HMAC
+		int messageLength = 32;
+		
+		
+		byte[] xorPart = new byte[messageLength];
+		byte[] randomness = new byte[randomnessLength];
+
+		System.arraycopy(ciphertext, 0           , xorPart, 0     , messageLength);
+		System.arraycopy(ciphertext, messageLength, randomness, 0     , randomnessLength);
+		
+		
+		//HMAC computation
+		byte[] hmacOutput = generateHmac(key, randomness);
+
+	
+		byte[] outputInBytes = new byte[32];
+		
+		int count  =0;
+		for (byte  b : hmacOutput) {
+			outputInBytes[count] = (byte) (b ^ xorPart[count]);
+			count++;
+		}
+		String output = new String(outputInBytes, "UTF-8");;
+
+
+		return output;
+	}
+	
+	// ***********************************************************************************************//
+
 	///////////////////// Message authentication+Encryption (Authenticated
 	///////////////////// encryption)
 	///////////////////// /////////////////////////////
@@ -193,7 +277,8 @@ public class CryptoPrimitives {
 
 		return output;
 	}
-
+	
+	
 	// ***********************************************************************************************//
 
 	///////////////////// Message authentication+Decryption (Authenticated
