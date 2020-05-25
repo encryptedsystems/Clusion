@@ -227,9 +227,9 @@ public class IEX2Lev implements Serializable {
 				RR2Lev.counter = 0;
 				// dataSize = (int) filterParameter;
 				disj2.getLocalMultiMap()[counter] = RR2Lev.constructEMMParGMM(
-						CryptoPrimitives.generateCmac(keys.get(0), keyword), secondaryLookup, bigBlock, smallBlock,
+						CryptoPrimitives.generateHmac(keys.get(0), keyword), secondaryLookup, bigBlock, smallBlock,
 						dataSize);
-				byte[] key3 = CryptoPrimitives.generateCmac(keys.get(1), 3 + keyword);
+				byte[] key3 = CryptoPrimitives.generateHmac(keys.get(1), 3 + keyword);
 				numberPairs = numberPairs + secondaryLookup.size();
 				dictionaryForMM.put(new String(key3), counter);
 

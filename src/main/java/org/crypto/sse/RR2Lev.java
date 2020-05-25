@@ -287,13 +287,13 @@ public class RR2Lev implements Serializable {
 			}
 
 			// generate the tag
-			byte[] key1 = CryptoPrimitives.generateCmac(key, 1 + word);
-			byte[] key2 = CryptoPrimitives.generateCmac(key, 2 + word);
+			byte[] key1 = CryptoPrimitives.generateHmac(key, 1 + word);
+			byte[] key2 = CryptoPrimitives.generateHmac(key, 2 + word);
 			int t = (int) Math.ceil((float) lookup.get(word).size() / bigBlock);
 
 			if (lookup.get(word).size() <= smallBlock) {
 				// pad DB(w) to "small block"
-				byte[] l = CryptoPrimitives.generateCmac(key1, Integer.toString(0));
+				byte[] l = CryptoPrimitives.generateHmac(key1, Integer.toString(0));
 				random.nextBytes(iv);
 				byte[] v =CryptoPrimitives.encryptAES_CTR_String(key2, iv,
 						"1 " + lookup.get(word).toString(), smallBlock * sizeOfFileIdentifer);
@@ -346,7 +346,7 @@ public class RR2Lev implements Serializable {
 
 				// medium case
 				if (t <= smallBlock) {
-					byte[] l = CryptoPrimitives.generateCmac(key1, Integer.toString(0));
+					byte[] l = CryptoPrimitives.generateHmac(key1, Integer.toString(0));
 					random.nextBytes(iv);
 					byte[] v = CryptoPrimitives.encryptAES_CTR_String(key2, iv,
 									"2 " + listArrayIndex.toString(), smallBlock * sizeOfFileIdentifer);
@@ -397,7 +397,7 @@ public class RR2Lev implements Serializable {
 
 					// Pad the second set of identifiers
 
-					byte[] l = CryptoPrimitives.generateCmac(key1, Integer.toString(0));
+					byte[] l = CryptoPrimitives.generateHmac(key1, Integer.toString(0));
 					random.nextBytes(iv);
 					byte[] v = CryptoPrimitives.encryptAES_CTR_String(key2, iv,
 							"3 " + listArrayIndexTwo.toString(), smallBlock * sizeOfFileIdentifer);
@@ -423,8 +423,8 @@ public class RR2Lev implements Serializable {
 	public static byte[][] token(byte[] key, String word) throws UnsupportedEncodingException {
 
 		byte[][] keys = new byte[2][];
-		keys[0] = CryptoPrimitives.generateCmac(key, 1 + word);
-		keys[1] = CryptoPrimitives.generateCmac(key, 2 + word);
+		keys[0] = CryptoPrimitives.generateHmac(key, 1 + word);
+		keys[1] = CryptoPrimitives.generateHmac(key, 2 + word);
 
 		return keys;
 	}
@@ -439,7 +439,7 @@ public class RR2Lev implements Serializable {
 			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
 			NoSuchProviderException, NoSuchPaddingException, IOException {
 
-		byte[] l = CryptoPrimitives.generateCmac(keys[0], Integer.toString(0));
+		byte[] l = CryptoPrimitives.generateHmac(keys[0], Integer.toString(0));
 
 		List<byte[]> tempList = new ArrayList<byte[]>(dictionary.get(new String(l)));
 

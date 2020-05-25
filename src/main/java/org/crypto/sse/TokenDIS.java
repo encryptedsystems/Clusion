@@ -35,11 +35,11 @@ public class TokenDIS implements Serializable {
 	public TokenDIS(List<String> subSearch, List<byte[]> listOfkeys) throws UnsupportedEncodingException {
 
 		this.tokenMMGlobal = RR2Lev.token(listOfkeys.get(0), subSearch.get(0));
-		this.tokenDIC = CryptoPrimitives.generateCmac(listOfkeys.get(1), 3 + subSearch.get(0));
+		this.tokenDIC = CryptoPrimitives.generateHmac(listOfkeys.get(1), 3 + subSearch.get(0));
 
 		for (int i = 1; i < subSearch.size(); i++) {
 			tokenMMLocal.add(
-					RR2Lev.token(CryptoPrimitives.generateCmac(listOfkeys.get(0), subSearch.get(0)), subSearch.get(i)));
+					RR2Lev.token(CryptoPrimitives.generateHmac(listOfkeys.get(0), subSearch.get(0)), subSearch.get(i)));
 		}
 
 	}
