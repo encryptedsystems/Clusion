@@ -9,7 +9,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -20,7 +20,7 @@
 
 /////////////////////				Response Hiding with add and delete operations					///////////
 
-//***********************************************************************************************//	
+//***********************************************************************************************//
 
 package org.crypto.sse;
 
@@ -197,11 +197,10 @@ public class DynRH {
 
 	// ***********************************************************************************************//
 
-	public static List<String> resolve(byte[] key, List<byte[]> list)
+	public static List<String> resolve(byte[] key2, List<byte[]> list)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
 			NoSuchProviderException, NoSuchPaddingException, IOException {
 
-		byte[] key2 = CryptoPrimitives.generateCmac(key, 1 + new String());
 		List<String> result = new ArrayList<String>();
 
 		for (byte[] ct : list) {

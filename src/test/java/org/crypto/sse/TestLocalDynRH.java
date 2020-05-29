@@ -15,7 +15,7 @@ import com.google.common.collect.TreeMultimap;
 public class TestLocalDynRH {
 
 	public static void main(String[] args) throws Exception {
-		
+
 		Printer.addPrinter(new Printer(Printer.LEVEL.EXTRA));
 
 		BufferedReader keyRead = new BufferedReader(new InputStreamReader(System.in));
@@ -94,7 +94,8 @@ public class TestLocalDynRH {
 				byte[][] token = DynRH.genTokenFS(sk, keyword);
 				// start
 				startTime = System.nanoTime();
-				List<String> result = DynRH.resolve(sk, DynRH.queryFS(token, emm));
+				byte[] key2 = CryptoPrimitives.generateCmac(sk, 1 + new String());
+				List<String> result = DynRH.resolve(key2, DynRH.queryFS(token, emm));
 				System.out.println(result);
 				// end
 				endTime = System.nanoTime();
@@ -119,7 +120,8 @@ public class TestLocalDynRH {
 				byte[][] token = DynRH.genToken(sk, keyword);
 				// start
 				startTime = System.nanoTime();
-				List<String> result = DynRH.resolve(sk, DynRH.query(token, emm));
+				byte[] key2 = CryptoPrimitives.generateCmac(sk, 1 + new String());
+				List<String> result = DynRH.resolve(key2, DynRH.query(token, emm));
 				System.out.println(result);
 				// end
 				endTime = System.nanoTime();
